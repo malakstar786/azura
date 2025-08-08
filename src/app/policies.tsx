@@ -1,20 +1,19 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Linking,
-} from 'react-native';
-import { Stack, router } from 'expo-router';
+import { t } from '@/i18n';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@theme';
 import { getFlexDirection } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
+import { Stack, router } from 'expo-router';
+import React from 'react';
+import {
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function PoliciesScreen() {
-  const { t } = useTranslation();
   
   const handlePolicyPress = async (url: string) => {
     try {

@@ -314,7 +314,7 @@ Test Credentials:
 ```
 
 #### 3. Forgot Password
-- **Endpoint**: `POST /index.php?route=extension/mstore/account|forgotten`
+- **Endpoint**: `POST /index.php?route=extension/mstore/account|forgetPassword`
 - **Content-Type**: `application/json`
 - **Request Body**:
 ```json
@@ -744,7 +744,7 @@ default: 1
 ### Checkout Endpoints
 
 #### 1. Checkout (Set Address)
-- **Endpoint**: `POST /index.php?route=extension/mstore/checkout`
+- **Endpoint**: `POST /index.php?route=extension/mstore/confirm`
 - **Content-Type**: `application/json`
 - **Authentication**: Required (OCSESSID)
 - **Request Body**:
@@ -766,7 +766,7 @@ default: 1
 ```
 
 #### 2. Set Shipping Method
-- **Endpoint**: `POST /index.php?route=extension/mstore/checkout|shipping_method`
+- **Endpoint**: `POST /index.php?route=extension/mstore/shipping_method`
 - **Content-Type**: `application/json`
 - **Authentication**: Required (OCSESSID)
 - **Request Body**:
@@ -787,7 +787,7 @@ default: 1
 ```
 
 #### 3. Set Payment Method
-- **Endpoint**: `POST /index.php?route=extension/mstore/checkout|payment_method`
+- **Endpoint**: `POST /index.php?route=extension/mstore/payment_method`
 - **Content-Type**: `application/json`
 - **Authentication**: Required (OCSESSID)
 - **Request Body**:
@@ -811,7 +811,7 @@ default: 1
 ```
 
 #### 4. Confirm Order
-- **Endpoint**: `POST /index.php?route=extension/mstore/checkout|confirm`
+- **Endpoint**: `POST /index.php?route=extension/mstore/order|confirm`
 - **Content-Type**: `application/json`
 - **Authentication**: Required (OCSESSID)
 - **Success Response** (200):

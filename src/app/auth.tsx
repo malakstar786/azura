@@ -1,27 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    ActivityIndicator,
-    Platform,
-    KeyboardAvoidingView,
-    ScrollView,
-    Alert,
-    Dimensions,
-} from 'react-native';
-import { Link, Stack, router, useLocalSearchParams } from 'expo-router';
-import { useAuthStore } from '@store/auth-store';
+import { t } from '@/i18n';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuthStore } from '@store/auth-store';
 import { theme } from '@theme';
-import { getTextAlign, getFlexDirection } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
+import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
+import { Link, Stack, router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function Auth() {
     const { login, signup, isAuthenticated } = useAuthStore();
-    const { t } = useTranslation();
     const [isLogin, setIsLogin] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});

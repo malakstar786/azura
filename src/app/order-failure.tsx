@@ -1,19 +1,18 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
-import { useRouter } from 'expo-router';
+import { t } from '@/i18n';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@theme';
-import { useTranslation } from '@utils/translations';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function OrderFailureScreen() {
   const router = useRouter();
-  const { t } = useTranslation();
 
   const handleTryAgain = () => {
     // Navigate back to checkout

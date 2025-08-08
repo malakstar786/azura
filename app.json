@@ -4,7 +4,7 @@
     "slug": "azura-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./src/assets/app_icon.png",
     "scheme": "azuraapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,25 +13,31 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./src/assets/app_icon.png",
+        "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./src/assets/icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "image": "./src/assets/icon.png",
+          "imageWidth": 300,
+          "resizeMode": "native",
+          "backgroundColor": "#000000",
+          "dark": {
+            "image": "./src/assets/icon.png",
+            "imageWidth": 300,
+            "resizeMode": "native",
+            "backgroundColor": "#000000"
+          }
         }
       ]
     ],
