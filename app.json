@@ -20,7 +20,8 @@
         "foregroundImage": "./src/assets/app_icon.png",
         "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.malakstar786.azuraapp"
     },
     "web": {
       "bundler": "metro",
@@ -47,7 +48,9 @@
       [
         "apple-pay-react-native-expo",
         {
-          "merchantIdentifiers": ["merchant.kw.com.azura"]
+          "merchantIdentifiers": [
+            "merchant.kw.com.azura"
+          ]
         }
       ]
     ],
