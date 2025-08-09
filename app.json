@@ -54,6 +54,12 @@
         "projectId": "0e6237c0-8566-4930-9a17-06692987195d"
       }
     },
-    "owner": "malakstar786"
+    "owner": "malakstar786",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0e6237c0-8566-4930-9a17-06692987195d"
+    }
   }
 }

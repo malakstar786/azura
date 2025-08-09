@@ -9,7 +9,7 @@ import { API_ENDPOINTS, makeApiCall } from '@utils/api-config';
 import { getFlexDirection } from '@utils/rtlStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 export default function CheckoutScreen() {
@@ -36,7 +36,6 @@ export default function CheckoutScreen() {
   const [methodsLoading, setMethodsLoading] = useState(false);
   const [showPaymentWebView, setShowPaymentWebView] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
-  const [applePayLoading, setApplePayLoading] = useState(false);
   const [orderConfirmationData, setOrderConfirmationData] = useState<any>(null);
 
   // Dynamic shipping cost calculation based on selected shipping method
@@ -60,150 +59,10 @@ export default function CheckoutScreen() {
     return hasAddress && hasShippingAddress && !!selectedShippingMethod && !!selectedPaymentMethod;
   };
 
-  // Helper function to parse price strings to numeric values for Apple Pay
-  const parsePrice = (priceString: string): number => {
-    // Remove all non-digit and non-decimal characters
-    const numericValue = parseFloat(priceString.replace(/[^\d.]/g, ''));
-    return isNaN(numericValue) ? 0 : numericValue;
-  };
+  
 
-
-  // Apple Pay payment processor - called when Place Order button is clicked
-  const onApplePayButtonClicked = async (orderId: string) => {
-    const startTime = Date.now();
-    const sessionId = `APL_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    console.log('🍏 [ApplePay] ========== APPLE PAY FLOW START ==========');
-    console.log('🍏 [ApplePay] Session ID:', sessionId);
-    console.log('🍏 [ApplePay] Timestamp:', new Date().toISOString());
-    console.log('🍏 [ApplePay] Order ID:', orderId);
-    console.log('🍏 [ApplePay] Platform:', Platform.OS, Platform.Version);
-    console.log('🍏 [ApplePay] User Agent:', 'N/A');
-    
-    // Platform validation
-    if (Platform.OS !== 'ios') {
-      console.log('❌ [ApplePay] Platform check failed - not iOS');
-      console.log('❌ [ApplePay] Current platform:', Platform.OS);
-      console.log('❌ [ApplePay] Aborting Apple Pay flow');
-      Alert.alert('Apple Pay is only available on iOS.');
-      return false;
-    }
-    console.log('✅ [ApplePay] Platform check passed - iOS detected');
-
-    // Dynamic import of Apple Pay module - only when user interacts
-    let ApplePay: any;
-    let MerchantCapability: any;
-    let PaymentNetwork: any;
-    let CompleteStatus: any;
-    
-
-    try {
-      console.log('🍏 [ApplePay] ========== PAYMENT CALCULATION PHASE ==========');
-      
-      // Calculate total amount for Apple Pay
-      const totalAmount = parsePrice(formatPrice(orderTotal));
 
   
-      // Check if the response is valid JSON
-      let result;
- 
-
-  
-      if (result) {
-        console.log('🍏 [ApplePay] ========== SUCCESS FLOW ==========');
-        console.log('✅ [ApplePay] Payment processing successful');
-        console.log('✅ [ApplePay] Result data:', JSON.stringify(result, null, 2));
-        
-        console.log('🍏 [ApplePay] Completing Apple Pay transaction with success status...');
-        await ApplePay.complete(CompleteStatus.success);
-        console.log('✅ [ApplePay] Apple Pay SDK notified of successful completion');
-        
-        // Clear cart
-        console.log('🍏 [ApplePay] Initiating cart cleanup...');
-        await clearCart();
-        console.log('✅ [ApplePay] Shopping cart cleared successfully');
-        
-        // Prepare success page data using stored order confirmation data
-        if (orderConfirmationData) {
-          const successData = {
-            order_id: orderConfirmationData.order_id,
-            store_name: orderConfirmationData.store_name,
-            firstname: orderConfirmationData.firstname,
-            lastname: orderConfirmationData.lastname,
-            email: orderConfirmationData.email,
-            date_added: orderConfirmationData.date_added,
-            total: orderConfirmationData.total,
-            payment_method: 'Apple Pay',
-            line_items: orderConfirmationData.line_items,
-          };
-          console.log('🍏 [ApplePay] Success page data prepared:', JSON.stringify(successData, null, 2));
-          
-          // Navigate to success page
-          console.log('🍏 [ApplePay] Navigating to order success page...');
-          router.replace({
-            pathname: '/order-success',
-            params: { orderData: JSON.stringify(successData) }
-          });
-        } else {
-          // Fallback to basic data if confirmation data is not available
-          const successData = {
-            order_id: orderId, 
-            payment_method: 'Apple Pay',
-            status: 'success',
-            session_id: sessionId,
-            timestamp: new Date().toISOString()
-          };
-          console.log('🍏 [ApplePay] Success page data prepared (fallback):', JSON.stringify(successData, null, 2));
-          
-          // Navigate to success page
-          console.log('🍏 [ApplePay] Navigating to order success page...');
-          router.replace({
-            pathname: '/order-success',
-            params: { orderData: JSON.stringify(successData) }
-          });
-        }
-        return true;
-      } else {
-        
-       
-    
-        return false;
-      }
-    } catch (error: any) {
-     
-      
-      const userErrorMessage = error?.message || 'Apple Pay payment failed';
-      console.log('🍏 [ApplePay] Preparing user-facing error message:', userErrorMessage);
-      Alert.alert('Apple Pay Error', userErrorMessage);
-      
-      // Ensure we complete the payment with failure if needed
-      console.log('🍏 [ApplePay] Attempting to complete Apple Pay transaction with failure status...');
-      try {
-        await ApplePay.complete(CompleteStatus.failure);
-        console.log('✅ [ApplePay] Successfully notified Apple Pay SDK of failure');
-      } catch (completeError: any) {
-        console.error('❌ [ApplePay] Critical: Failed to complete Apple Pay transaction');
-        console.error('❌ [ApplePay] Complete error type:', typeof completeError);
-        console.error('❌ [ApplePay] Complete error message:', completeError?.message || 'Unknown completion error');
-        console.error('❌ [ApplePay] Complete error stack:', completeError?.stack || 'No stack trace');
-        console.error('❌ [ApplePay] This may leave Apple Pay in an inconsistent state');
-        // Ignore errors when completing payment in error state
-      }
-      
-      console.log('🍏 [ApplePay] Error handling completed, returning false');
-      return false;
-    } finally {
-      const totalDuration = Date.now() - startTime;
-      setApplePayLoading(false);
-      
-      console.log('🍏 [ApplePay] ========== APPLE PAY FLOW CLEANUP ==========');
-      console.log('🍏 [ApplePay] Loading state set to false');
-      console.log('🍏 [ApplePay] Session ID:', sessionId);
-      console.log('🍏 [ApplePay] Total flow duration:', `${totalDuration}ms`);
-      console.log('🍏 [ApplePay] End timestamp:', new Date().toISOString());
-      console.log('🍏 [ApplePay] ========== APPLE PAY FLOW END ==========');
-    }
-  };
 
   // Load addresses and cart on mount
   useEffect(() => {
@@ -720,12 +579,6 @@ export default function CheckoutScreen() {
     console.log('💳 [Payment Selection] Method title:', method?.title || 'No title');
     console.log('💳 [Payment Selection] Method sort order:', method?.sort_order || 'No sort order');
     
-    // Check if Apple Pay KNET is selected
-    if (method?.code === 'applepay_knet') {
-      console.log('🍏 [Payment Selection] Apple Pay KNET payment method selected');
-      console.log('🍏 [Payment Selection] Apple Pay method details:', JSON.stringify(method, null, 2));
-    }
-    
     setSelectedPaymentMethod(method);
     console.log('💳 [Payment Selection] Updated selectedPaymentMethod state');
     
@@ -785,20 +638,7 @@ export default function CheckoutScreen() {
 
       console.log(`🛒 [Order] Selected payment method: ${selectedPaymentMethod?.code || 'unknown'}`);
 
-      // For Apple Pay, ensure we set the correct payment method first
-      if (selectedPaymentMethod?.code === 'applepay_knet' && Platform.OS === 'ios') {
-        console.log('🍏 [ApplePay] Apple Pay payment method detected, setting applepay_knet as payment method');
-        // Explicitly set payment method to Apple Pay KNET
-        await makeApiCall(API_ENDPOINTS.setPaymentMethod, {
-          method: 'POST',
-          data: {
-            payment_method: 'applepay_knet' 
-          }
-        });
-        console.log('🍏 [ApplePay] Payment method set to applepay_knet');
-      }
-      
-      // Confirm order for all payment methods (including Apple Pay)
+      // Confirm order for all payment methods
       console.log('🛒 [Order] Confirming order with backend');
       console.log('🛒 [Order] API endpoint:', API_ENDPOINTS.confirmOrder);
       console.log('🛒 [Order] Request method: POST');
@@ -837,14 +677,6 @@ export default function CheckoutScreen() {
       setOrderConfirmationData(confirmResponse.data);
 
       // Now handle payment method-specific flows
-      if (selectedPaymentMethod?.code === 'applepay_knet' && Platform.OS === 'ios') {
-        console.log('🍏 [ApplePay] Starting Apple Pay flow for order:', confirmResponse.data.order_id);
-        // Trigger Apple Pay payment flow with the order ID
-        const success = await onApplePayButtonClicked(confirmResponse.data.order_id);
-        console.log(`🍏 [ApplePay] Apple Pay flow completed with success: ${success}`);
-        setIsLoading(false);
-        return;
-      }
 
       // For other payment methods with redirect URL (KNet, Credit Card)
       if (confirmResponse.data.redirect_url) {
@@ -1420,20 +1252,12 @@ ${address.address_2 || ''}`;
             </View>
           ) : paymentMethods.length > 0 ? (
             <View style={styles.methodsList}>
-              {paymentMethods.filter((method: any) => {
-                // Filter out Apple Pay for non-iOS platforms
-                if (method.code === 'applepay_knet' && Platform.OS !== 'ios') {
-                  return false;
-                }
-                return true;
-              }).map((method: any, index: number) => (
+            {paymentMethods.map((method: any, index: number) => (
                 <TouchableOpacity
                   key={index}
                   style={[
                     styles.methodOption,
-                    method.code === 'applepay_knet' ? styles.applePayMethodOption : null,
-                    selectedPaymentMethod === method && styles.selectedMethodOption,
-                    selectedPaymentMethod === method && method.code === 'applepay_knet' && styles.selectedApplePayMethodOption
+                    selectedPaymentMethod === method && styles.selectedMethodOption
                   ]}
                   onPress={() => {
                     handlePaymentMethodSelection(method);
@@ -1448,34 +1272,9 @@ ${address.address_2 || ''}`;
                     </View>
                   </View>
                   <View style={styles.methodInfo}>
-                    {method.code === 'applepay_knet' ? (
-                      <View style={styles.applePayMethodContent}>
-                        <View style={[
-                          styles.applePayBadge,
-                          selectedPaymentMethod === method ? styles.applePayBadgeSelected : styles.applePayBadgeUnselected
-                        ]}>
-                    <Ionicons 
-                      name="logo-apple" 
-                            size={16} 
-                            color={selectedPaymentMethod === method ? "#fff" : "#fff"} 
-                            style={styles.appleLogoIcon}
-                    />
-                  <Text style={[
-                    styles.applePayText,
-                            selectedPaymentMethod === method ? styles.applePayTextSelected : styles.applePayTextUnselected
-                  ]}>
-                            Pay
-                  </Text>
-                    </View>
-                        <Text style={styles.methodSubtext}>Apple Pay via KNET</Text>
-                  </View>
-                    ) : (
-                      <>
-                        <Text style={styles.methodTitle}>{method.title || method.name}</Text>
-                        {method.terms && (
-                          <Text style={styles.methodTerms}>{method.terms}</Text>
-                        )}
-                      </>
+                    <Text style={styles.methodTitle}>{method.title || method.name}</Text>
+                    {method.terms && (
+                      <Text style={styles.methodTerms}>{method.terms}</Text>
                     )}
                   </View>
                 </TouchableOpacity>
@@ -2243,71 +2042,5 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: '#666',
-  },
-  // Apple Pay styles
-  applePayButton: {
-    flexDirection: getFlexDirection('row'),
-    alignItems: 'center',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E5E5E5',
-    borderRadius: 8,
-    marginTop: 8,
-    backgroundColor: '#fff',
-  },
-  selectedApplePayButton: {
-    borderColor: '#000',
-    backgroundColor: '#000',
-  },
-  applePayIcon: {
-    marginEnd: 12,
-  },
-  selectedApplePayText: {
-    color: '#ffffff',
-  },
-  applePayMethodOption: {
-    backgroundColor: '#f2f2f2',
-    borderColor: '#e0e0e0',
-  },
-  selectedApplePayMethodOption: {
-    backgroundColor: '#000000',
-    borderColor: '#000000',
-  },
-  applePayMethodContent: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-  },
-  applePayBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#000000',
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginBottom: 4,
-  },
-  applePayBadgeSelected: {
-    backgroundColor: '#000000',
-  },
-  applePayBadgeUnselected: {
-    backgroundColor: '#000000',
-  },
-  appleLogoIcon: {
-    marginRight: 2,
-  },
-  applePayText: {
-    color: '#ffffff',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  applePayTextSelected: {
-    color: '#ffffff',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  applePayTextUnselected: {
-    color: '#ffffff',
-    fontWeight: 'bold',
-    fontSize: 14,
   },
 }); 

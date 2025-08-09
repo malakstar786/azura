@@ -1,5 +1,4 @@
 import ErrorBoundary from '@components/ErrorBoundary';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLanguageStore } from '@store/language-store';
 import { theme } from '@theme';
 import { getOrCreateOCSESSID } from '@utils/api-config';
@@ -90,10 +89,8 @@ function RootLayout() {
         
         if (isFirstTimeUser && !hasNavigationLock) {
           console.log("First time user detected, navigating to language selection");
-          // Set AsyncStorage directly to ensure consistency
-          await AsyncStorage.setItem('isFirstTimeUser', 'false');
-          // Navigate to language selection
-          router.replace("language-selection/index" as any);
+          // Navigate to language selection (route path)
+          router.replace('/language-selection');
         } else {
           console.log("Not first time user or navigation already occurred, staying on main screen");
         }
