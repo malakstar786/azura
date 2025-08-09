@@ -18,6 +18,9 @@ export const translations = {
     
     // Drawer Menu
     'drawer.browse': 'BROWSE',
+
+    // Not Found
+    'not.exist': 'Sorry, this page doesn\'t exist.',
     
     // Home
     'home.explore': 'Explore',
@@ -170,6 +173,10 @@ export const translations = {
     
     // Validation messages
     'validation.fullNameRequired': 'Full name is required',
+    'validation.firstNameRequired': 'First name is required',
+    'validation.lastNameRequired': 'Last name is required',
+    'validation.emailRequired': 'Email is required',
+    'validation.mobileRequired': 'Mobile number is required',
     'validation.invalidEmail': 'Invalid email address',
     'validation.invalidMobile': 'Invalid mobile number',
     'validation.passwordTooShort': 'Password must be at least 6 characters long',
@@ -209,6 +216,7 @@ export const translations = {
     
     // User Details
     'userDetails.title': 'USER DETAILS',
+    'userDetails.subtitle': 'Update your account information',
     'userDetails.firstName': 'FIRST NAME',
     'userDetails.lastName': 'LAST NAME',
     'userDetails.email': 'EMAIL',
@@ -325,6 +333,9 @@ export const translations = {
     
     // Drawer Menu
     'drawer.browse': 'تصفح',
+
+    // Not Found
+    'not.exist': 'عذراً، هذه الصفحة غير موجودة.',
     
     // Home
     'home.explore': 'استكشف',
@@ -477,6 +488,10 @@ export const translations = {
     
     // Validation messages
     'validation.fullNameRequired': 'يجب إدخال الاسم الكامل',
+    'validation.firstNameRequired': 'الاسم الأول مطلوب',
+    'validation.lastNameRequired': 'اسم العائلة مطلوب',
+    'validation.emailRequired': 'البريد الإلكتروني مطلوب',
+    'validation.mobileRequired': 'رقم الجوال مطلوب',
     'validation.invalidEmail': 'عنوان بريد إلكتروني غير صالح',
     'validation.invalidMobile': 'رقم جوال غير صالح',
     'validation.passwordTooShort': 'يجب أن تكون كلمة المرور على الأقل 6 أحرف طويلة',
@@ -516,6 +531,7 @@ export const translations = {
     
     // User Details
     'userDetails.title': 'بيانات المستخدم',
+    'userDetails.subtitle': 'حدّث معلومات حسابك',
     'userDetails.firstName': 'الاسم الأول',
     'userDetails.lastName': 'اسم العائلة',
     'userDetails.email': 'البريد الإلكتروني',
@@ -617,3 +633,28 @@ export const translations = {
 } as const;
 
 export type TranslationKeys = keyof typeof translations['en']; // Infer keys from English translations
+
+// Lightweight translation hook aligned with language store
+import { useLanguageStore } from '@store/language-store';
+import React from 'react';
+
+function formatWithPlaceholders(template: string, values?: Array<string | number>): string {
+  if (!values || values.length === 0) return template
+  return values.reduce((acc: string, value, index) => acc.replace(new RegExp(`\\{${index}\\}`, 'g'), String(value)), template)
+}
+
+function translateFor(lang: 'en' | 'ar', key: TranslationKeys, params?: Array<string | number>): string {
+  const dict = translations[lang]
+  const fallbackDict = translations.en
+  const raw = (dict[key] ?? fallbackDict[key] ?? key) as unknown as string
+  return formatWithPlaceholders(raw, params)
+}
+
+export function useTranslation() {
+  const currentLanguage = useLanguageStore((s) => s.currentLanguage)
+  const t = React.useCallback(
+    (key: TranslationKeys, params?: Array<string | number>) => translateFor(currentLanguage, key, params),
+    [currentLanguage]
+  )
+  return { t, currentLanguage }
+}

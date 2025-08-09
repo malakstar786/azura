@@ -3,13 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@theme';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function OrderFailureScreen() {
   const router = useRouter();
@@ -20,7 +15,8 @@ export default function OrderFailureScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.header}>
         <View style={styles.errorIcon}>
           <View style={styles.receiptIcon}>
@@ -43,7 +39,8 @@ export default function OrderFailureScreen() {
       <TouchableOpacity style={styles.tryAgainButton} onPress={handleTryAgain}>
         <Text style={styles.tryAgainButtonText}>{t('order.tryAgain')}</Text>
       </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

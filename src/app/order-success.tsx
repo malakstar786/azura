@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { t } from '@/i18n';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@theme';
-import { getTextAlign, getFlexDirection } from '@utils/rtlStyles';
+import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface OrderData {
   order_id: string;
@@ -71,24 +73,23 @@ export default function OrderSuccessScreen() {
   const productData = getProductData();
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.header}>
         <View style={styles.checkIcon}>
           <Ionicons name="checkmark" size={32} color={theme.colors.white} />
         </View>
         
-        <Text style={styles.thankYouTitle}>THANK YOU</Text>
-        <Text style={styles.successMessage}>
-          YOUR ORDER HAS BEEN PLACED SUCCESSFULLY
-        </Text>
+          <Text style={styles.thankYouTitle}>{t('order.success')}</Text>
+          <Text style={styles.successMessage}>{t('order.successMessage')}</Text>
       </View>
 
       <View style={styles.orderCard}>
         <View style={styles.productSection}>
           <View style={styles.productInfo}>
-            <Text style={styles.sku}>SKU: {productData.sku}</Text>
-            <Text style={styles.productName}>{productData.name}</Text>
-            <Text style={styles.quantity}>QTY: {productData.quantity}</Text>
+              <Text style={styles.sku}>{t('order.sku')} {productData.sku}</Text>
+              <Text style={styles.productName}>{productData.name}</Text>
+              <Text style={styles.quantity}>{t('order.qty')} {productData.quantity}</Text>
           </View>
         </View>
 
@@ -96,21 +97,21 @@ export default function OrderSuccessScreen() {
 
         <View style={styles.orderDetails}>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>ORDER ID</Text>
+              <Text style={styles.detailLabel}>{t('order.orderId')}</Text>
             <Text style={styles.detailValue}>
               {orderData?.order_id ? formatOrderId(orderData.order_id) : ''}
             </Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>EMAIL</Text>
+              <Text style={styles.detailLabel}>{t('order.email')}</Text>
             <Text style={styles.detailValue}>
               {orderData?.email ? orderData.email.toUpperCase() : ''}
             </Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>PAYMENT METHOD</Text>
+              <Text style={styles.detailLabel}>{t('order.paymentMethod')}</Text>
             <Text style={styles.detailValue}>
               {orderData?.payment_method ? orderData.payment_method.toUpperCase() : 'K-NET'}
             </Text>
@@ -119,9 +120,10 @@ export default function OrderSuccessScreen() {
       </View>
 
       <TouchableOpacity style={styles.continueButton} onPress={handleContinueShopping}>
-        <Text style={styles.continueButtonText}>CONTINUE SHOPPING</Text>
+          <Text style={styles.continueButtonText}>{t('order.continueShopping')}</Text>
       </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

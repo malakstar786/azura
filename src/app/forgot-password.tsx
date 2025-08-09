@@ -1,18 +1,20 @@
+import { t } from '@/i18n';
+import { theme } from '@/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { API_ENDPOINTS, makeApiCall } from '@utils/api-config';
+import { Stack, router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
+    ActivityIndicator,
+    Alert,
+    I18nManager,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { Stack, router } from 'expo-router';
-import { useAuthStore } from '@store/auth-store';
-import { Ionicons } from '@expo/vector-icons';
-import { makeApiCall, API_ENDPOINTS } from '@utils/api-config';
-import { theme } from '@/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -21,7 +23,7 @@ export default function ForgotPassword() {
 
   const handleSubmit = async () => {
     if (!email) {
-      setError('Please enter your email address');
+      setError(t('validation.invalidEmail'));
       return;
     }
 
@@ -40,47 +42,45 @@ export default function ForgotPassword() {
 
       if (response.success === 1) {
         Alert.alert(
-          'Email Sent',
-          response.data?.[0] || 'A password reset link has been sent to your email. Please check your email.',
-          [{ text: 'OK', onPress: () => router.back() }]
+          t('common.done'),
+          response.data?.[0] || t('common.done'),
+          [{ text: t('common.ok'), onPress: () => router.back() }]
         );
       } else {
-        setError(response.error?.[0] || 'Email not found');
+        setError(response.error?.[0] || t('common.error'));
       }
     } catch (error: any) {
-      setError(error.message || 'An error occurred. Please try again later.');
+      setError(error.message || t('common.error'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Stack.Screen 
         options={{
           title: '',
           headerShadowVisible: false,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={24} color="black" />
+              <Ionicons name="arrow-back" size={24} color={theme.colors.black} style={{ transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] }} />
             </TouchableOpacity>
           ),
         }} 
       />
 
       <View style={styles.content}>
-        <Text style={styles.title}>FORGOT PASSWORD?</Text>
-        <Text style={styles.subtitle}>RESET LINK WILL BE SENT TO YOUR EMAIL</Text>
+        <Text style={styles.title}>{t('auth.forgotPassword')}</Text>
+        <Text style={styles.subtitle}>{t('signup.subtitle')}</Text>
 
         <View style={styles.divider} />
 
-        <Text style={styles.instruction}>
-          ENTER YOUR REGISTERED EMAIL
-        </Text>
+        <Text style={styles.instruction}>{t('auth.enterLoginDetails')}</Text>
 
         <View style={styles.inputContainer}>
           <TextInput
-            placeholder="REGISTERED EMAIL"
+            placeholder={t('auth.email')}
             style={styles.input}
             value={email}
             onChangeText={setEmail}
@@ -100,11 +100,11 @@ export default function ForgotPassword() {
           {isLoading ? (
             <ActivityIndicator color={theme.colors.white} />
           ) : (
-            <Text style={styles.sendButtonText}>SEND</Text>
+            <Text style={styles.sendButtonText}>{t('common.ok')}</Text>
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

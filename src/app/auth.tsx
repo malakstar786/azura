@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  I18nManager,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -18,6 +19,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Auth() {
     const { login, signup, isAuthenticated } = useAuthStore();
@@ -74,8 +76,8 @@ export default function Auth() {
     const handleLogin = async () => {
       if (!loginForm.email || !loginForm.password) {
         setErrors({ 
-          email: !loginForm.email ? 'Email is required' : '',
-          password: !loginForm.password ? 'Password is required' : ''
+          email: t('auth.loginError'),
+          password: t('auth.loginError')
         });
         return;
       }
@@ -89,14 +91,12 @@ export default function Auth() {
         
         // Router will handle redirection in the useEffect hook
       } catch (error: any) {
-        // Show simple error message without console errors
-        const errorMessage = 'Invalid credentials';
-        
+        const errorMessage = t('auth.loginError');
         setErrors({ 
           email: errorMessage, 
           password: errorMessage  
         });
-        Alert.alert('Login Failed', errorMessage);
+        Alert.alert(t('common.error'), errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -110,7 +110,7 @@ export default function Auth() {
       const validationErrors: Record<string, string> = {};
       
       if (!signupForm.firstname?.trim()) {
-        validationErrors.firstname = 'Full name is required';
+        validationErrors.firstname = t('validation.fullNameRequired');
       }
       
       // We don't need lastname validation since we're using firstname for full name
@@ -118,22 +118,20 @@ export default function Auth() {
       //   validationErrors.lastname = 'Last name is required';
       // }
       
-      if (!signupForm.email?.trim()) {
-        validationErrors.email = 'Email is required';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupForm.email)) {
-        validationErrors.email = 'Please enter a valid email address';
+      if (!signupForm.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupForm.email)) {
+        validationErrors.email = t('validation.invalidEmail');
       }
       
       if (!signupForm.telephone?.trim()) {
-        validationErrors.telephone = 'Mobile number is required';
+        validationErrors.telephone = t('validation.invalidMobile');
       } else if (!/^\d{8,}$/.test(signupForm.telephone.replace(/\D/g, ''))) {
-        validationErrors.telephone = 'Please enter a valid mobile number';
+        validationErrors.telephone = t('validation.invalidMobile');
       }
       
       if (!signupForm.password?.trim()) {
-        validationErrors.password = 'Password is required';
+        validationErrors.password = t('validation.passwordTooShort');
       } else if (signupForm.password.length < 6) {
-        validationErrors.password = 'Password must be at least 6 characters long';
+        validationErrors.password = t('validation.passwordTooShort');
       }
       
       if (Object.keys(validationErrors).length > 0) {
@@ -180,13 +178,13 @@ export default function Auth() {
           name: error.name
         });
         
-        let errorMessage = error.message || 'An error occurred during signup';
+        let errorMessage = error.message || t('auth.registrationError');
         
         // Handle specific error cases
         if (errorMessage.includes('temporarily unavailable')) {
-          errorMessage = 'The registration service is currently unavailable. Please try again later.';
+          errorMessage = t('error.serverUnavailable');
         } else if (errorMessage.includes('already exists')) {
-          errorMessage = 'An account with this email already exists. Please try logging in instead.';
+          errorMessage = t('auth.registrationError');
         }
         
         console.error('🔴 AUTH.TSX: Final error message shown to user:', errorMessage);
@@ -195,7 +193,7 @@ export default function Auth() {
           email: errorMessage
         });
         
-        Alert.alert('Signup Failed', errorMessage);
+        Alert.alert(t('common.error'), errorMessage);
       } finally {
         setIsLoading(false);
         console.log('🏁 AUTH.TSX: Signup process completed');
@@ -376,30 +374,32 @@ export default function Auth() {
     );
 
     return (
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
-      >
-        <Stack.Screen
-          options={{
-            title: '',
-            headerShadowVisible: false,
-            headerLeft: () => (
-              <TouchableOpacity onPress={() => router.back()}>
-                <Ionicons name="arrow-back" size={24} color="black" />
-              </TouchableOpacity>
-            ),
-          }}
-        />
-        
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
         >
-          {isLogin ? renderLoginForm() : renderSignupForm()}
-        </ScrollView>
-      </KeyboardAvoidingView>
+          <Stack.Screen
+            options={{
+              title: '',
+              headerShadowVisible: false,
+              headerLeft: () => (
+                <TouchableOpacity onPress={() => router.back()}>
+                  <Ionicons name="arrow-back" size={24} color={theme.colors.black} style={{ transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] }} />
+                </TouchableOpacity>
+              ),
+            }}
+          />
+          
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {isLogin ? renderLoginForm() : renderSignupForm()}
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     );
 }
 

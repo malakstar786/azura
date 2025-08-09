@@ -1,7 +1,7 @@
-import { setI18nLanguage } from '@/i18n';
+import { getBestDeviceLanguage, setI18nLanguage } from '@/i18n';
 import { theme } from '@/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { I18nManager } from 'react-native';
+import { Alert, DevSettings, I18nManager, Platform } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -65,10 +65,28 @@ export const useLanguageStore = create<LanguageState>()(
 
         // Check if direction needs to be flipped
         if (I18nManager.isRTL !== isNewRTL) {
+          I18nManager.allowRTL(true);
           I18nManager.forceRTL(isNewRTL);
           needsRestart = true;
-          // Forcing RTL requires a restart for *some* native components to re-layout correctly.
-          // This is crucial. We'll handle this with a reload prompt/mechanism.
+          // Attempt to reload the app so native direction applies globally
+          if (Platform.OS !== 'web') {
+            try {
+              if (__DEV__) {
+                DevSettings.reload();
+              } else {
+                // Optional runtime import to avoid dependency requirement in dev
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                const Updates = (() => { try { return require('expo-updates') } catch { return null } })();
+                if (Updates?.reloadAsync) {
+                  await Updates.reloadAsync();
+                } else {
+                  Alert.alert('Restart Required', 'Please restart the app to apply language direction changes.');
+                }
+              }
+            } catch {
+              Alert.alert('Restart Required', 'Please restart the app to apply language direction changes.');
+            }
+          }
         }
         
         // Update i18n locale
@@ -129,7 +147,8 @@ export const useLanguageStore = create<LanguageState>()(
           
           // Get stored language preference from AsyncStorage
           const storedLanguage = await AsyncStorage.getItem('appLanguage');
-          let initialLanguage: Language = 'en'; // Default to 'en'
+          const deviceDefault = getBestDeviceLanguage() as Language;
+          let initialLanguage: Language = deviceDefault; // Default to best device language
           
           // If appLanguage found, use it
           if (storedLanguage === 'en' || storedLanguage === 'ar') {

@@ -1,3 +1,4 @@
+import ErrorBoundary from '@components/ErrorBoundary';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLanguageStore } from '@store/language-store';
 import { theme } from '@theme';
@@ -5,6 +6,8 @@ import { getOrCreateOCSESSID } from '@utils/api-config';
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useRef, useState } from 'react';
+import { View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider } from "react-native-toast-notifications";
 
 // Prevent the splash screen from auto-hiding
@@ -14,7 +17,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 
 export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
-  const { isFirstTimeUser, isRTL, initialize, checkAndSetNavigationLock } = useLanguageStore();
+  const { isFirstTimeUser, isRTL, init, isLoading, checkAndSetNavigationLock } = useLanguageStore();
   const router = useRouter();
   const navigationPerformedRef = useRef<boolean>(false);
 
@@ -38,7 +41,7 @@ export default function RootLayout() {
         
         // Initialize language store with extra safety
         try {
-          await initialize();
+          await init();
         } catch (languageError) {
           console.warn('Language initialization failed, using defaults:', languageError);
           // Set safe fallback state if language store fails
@@ -99,70 +102,76 @@ export default function RootLayout() {
   }, [isReady, isFirstTimeUser, checkAndSetNavigationLock, router]);
 
   // While initializing, keep rendering nothing so the native splash remains visible
-  if (!isReady) return null;
+  if (!isReady || isLoading) return null;
 
   return (
     <ToastProvider>
-      <Stack
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: theme.colors.white,
-          },
-          headerTintColor: theme.colors.black,
-          // Configure RTL-aware navigation direction
-          animation: isRTL ? 'slide_from_left' : 'slide_from_right',
-        }}
-      >
-        <Stack.Screen
-          name="(shop)"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="categories"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="product"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen 
-          name="auth" 
-          options={{ headerShown: true }} 
-        />
-        <Stack.Screen
-          name="orders/index"
-          options={{
-            headerShown: false,
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          <View style={{ flex: 1, direction: isRTL ? 'rtl' : 'ltr' }}>
+          <Stack
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: theme.colors.white,
+            },
+            headerTintColor: theme.colors.black,
+            // Configure RTL-aware navigation direction
             animation: isRTL ? 'slide_from_left' : 'slide_from_right',
-            presentation: 'card'
           }}
-        />
-        <Stack.Screen
-          name="checkout"
-          options={{
-            headerShown: false,
-            presentation: 'modal'
-          }}
-        />
-        <Stack.Screen
-          name="language-selection/index"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen 
-          name="policies" 
-          options={{ headerShown: true }} 
-        />
-        <Stack.Screen
-          name="order-success"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="order-failure"
-          options={{ headerShown: false }}
-        />
-      </Stack>
+        >
+          <Stack.Screen
+            name="(shop)"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="categories"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="product"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen 
+            name="auth" 
+            options={{ headerShown: true }} 
+          />
+          <Stack.Screen
+            name="orders/index"
+            options={{
+              headerShown: false,
+              animation: isRTL ? 'slide_from_left' : 'slide_from_right',
+              presentation: 'card'
+            }}
+          />
+          <Stack.Screen
+            name="checkout"
+            options={{
+              headerShown: false,
+              presentation: 'modal'
+            }}
+          />
+          <Stack.Screen
+            name="language-selection/index"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen 
+            name="policies" 
+            options={{ headerShown: true }} 
+          />
+          <Stack.Screen
+            name="order-success"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="order-failure"
+            options={{ headerShown: false }}
+          />
+          </Stack>
+          </View>
+        </ErrorBoundary>
+      </SafeAreaProvider>
     </ToastProvider>
   );
 }
