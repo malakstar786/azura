@@ -24,15 +24,10 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "server",
       "favicon": "./src/assets/icon.png"
     },
-    "plugins": 
-    [
-      "apple-pay-react-native-expo", 
-      {
-        "merchantIdentifier": "merchant.kw.com.azura"
-      },
+    "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
@@ -47,6 +42,12 @@
             "resizeMode": "native",
             "backgroundColor": "#000000"
           }
+        }
+      ],
+      [
+        "apple-pay-react-native-expo",
+        {
+          "merchantIdentifiers": ["merchant.kw.com.azura"]
         }
       ]
     ],
