@@ -27,7 +27,12 @@
       "output": "static",
       "favicon": "./src/assets/icon.png"
     },
-    "plugins": [
+    "plugins": 
+    [
+      "apple-pay-react-native-expo", 
+      {
+        "merchantIdentifier": "merchant.kw.com.azura"
+      },
       "expo-router",
       [
         "expo-splash-screen",

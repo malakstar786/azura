@@ -23,6 +23,9 @@ importers:
       '@react-navigation/native':
         specifier: ^7.1.6
         version: 7.1.17(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
+      apple-pay-react-native-expo:
+        specifier: ^0.0.3
+        version: 0.0.3(expo@53.0.20(@babel/core@7.28.0)(@expo/metro-runtime@5.0.4(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0)))(graphql@16.8.1)(react-native-webview@13.13.5(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
       axios:
         specifier: ^1.11.0
         version: 1.11.0
@@ -1502,6 +1505,13 @@ packages:
   anymatch@3.1.3:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
     engines: {node: '>= 8'}
+
+  apple-pay-react-native-expo@0.0.3:
+    resolution: {integrity: sha512-2qaq56Kv/Lm2EcTM2tssewR//+B8LoXBwaimycuVN3KwTwdtzionGr+W+iH3x+fud+aOy4M8kMRzI8IEIfNRgg==}
+    peerDependencies:
+      expo: '*'
+      react: '*'
+      react-native: '*'
 
   arg@4.1.0:
     resolution: {integrity: sha512-ZWc51jO3qegGkVh8Hwpv636EkbesNV5ZNQPCtRa+0qytRYPEs9IYT9qITY9buezqUH5uqyzlWLcufrzU2rffdg==}
@@ -6796,6 +6806,12 @@ snapshots:
     dependencies:
       normalize-path: 3.0.0
       picomatch: 2.3.1
+
+  apple-pay-react-native-expo@0.0.3(expo@53.0.20(@babel/core@7.28.0)(@expo/metro-runtime@5.0.4(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0)))(graphql@16.8.1)(react-native-webview@13.13.5(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0):
+    dependencies:
+      expo: 53.0.20(@babel/core@7.28.0)(@expo/metro-runtime@5.0.4(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0)))(graphql@16.8.1)(react-native-webview@13.13.5(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
+      react: 19.0.0
+      react-native: 0.79.5(@babel/core@7.28.0)(@types/react@19.0.14)(react@19.0.0)
 
   arg@4.1.0: {}
 
