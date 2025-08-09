@@ -1,12 +1,12 @@
+import { useTranslation } from '@/i18n/useTranslation';
+import { theme } from '@/theme';
 import CurrencyDropdown from '@components/CurrencyDropdown';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@store/auth-store';
 import { useLanguageStore } from '@store/language-store';
-import { theme } from '@theme';
 import { API_ENDPOINTS, makeApiCall } from '@utils/api-config';
 import { getFlexDirection } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
 import { router } from 'expo-router';
 import React, { useEffect } from 'react';
 import {
@@ -54,11 +54,11 @@ export default function AccountScreen() {
       if (response.success === 1 && response.data) {
         setUserProfile(response.data);
       } else {
-        throw new Error(Array.isArray(response.error) ? response.error[0] : 'Failed to fetch profile');
+        throw new Error(Array.isArray(response.error) ? response.error[0] : t('account.fetchProfileError'));
       }
     } catch (error: any) {
       console.error('Error fetching user profile:', error);
-      Alert.alert('Error', 'Failed to fetch user profile. Please try again.');
+      Alert.alert(t('common.error'), t('account.fetchProfileError'));
     } finally {
       setIsLoading(false);
     }
@@ -66,12 +66,12 @@ export default function AccountScreen() {
 
   const handleLogout = async () => {
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
+      t('account.logout'),
+      t('account.confirmLogout'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Logout',
+          text: t('account.logout'),
           onPress: async () => {
             setIsLoading(true);
             try {
@@ -82,7 +82,7 @@ export default function AccountScreen() {
               router.replace('/');
             } catch (error) {
               console.error('Logout error:', error);
-              Alert.alert('Error', 'Failed to logout. Please try again.');
+              Alert.alert(t('common.error'), t('error.generic'));
             } finally {
               setIsLoading(false);
             }

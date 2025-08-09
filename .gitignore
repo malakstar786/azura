@@ -38,7 +38,3 @@ yarn-error.*
 *.tsbuildinfo
 
 service-account-file.json
-
-.env.local
-
-.env.local

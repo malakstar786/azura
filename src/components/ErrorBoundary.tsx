@@ -1,4 +1,4 @@
-import { t } from '@/i18n';
+import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@/theme';
 import { useLanguageStore } from '@store/language-store';
 import React from 'react';
@@ -54,6 +54,7 @@ interface ErrorFallbackProps {
 }
 
 function ErrorFallback({ onRetry, error }: ErrorFallbackProps) {
+  const { t } = useTranslation();
   const isRTL = useLanguageStore((s) => s.isRTL);
   const showDetails = __DEV__ && error?.message;
 

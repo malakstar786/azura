@@ -1,6 +1,6 @@
-import { create } from 'zustand';
+import { API_ENDPOINTS, makeApiCall } from '@utils/api-config';
 import { Alert } from 'react-native';
-import { makeApiCall, API_ENDPOINTS } from '@utils/api-config';
+import { create } from 'zustand';
 
 export interface Order {
   order_id: string;
@@ -31,7 +31,7 @@ export const useOrderStore = create<OrderStore>((set) => ({
       console.log('🔍 ORDER STORE: Fetching order history...');
 
       // Check if user is authenticated first
-      const { useAuthStore } = await import('./auth-store');
+      const { useAuthStore } = await import('@store/auth-store');
       const { isAuthenticated, user } = useAuthStore.getState();
       
       if (!isAuthenticated || !user) {

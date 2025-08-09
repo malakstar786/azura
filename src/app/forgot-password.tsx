@@ -1,22 +1,23 @@
-import { t } from '@/i18n';
+import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { API_ENDPOINTS, makeApiCall } from '@utils/api-config';
 import { Stack, router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    I18nManager,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
+  const isRTL = require('@store/language-store').useLanguageStore.getState().isRTL as boolean;
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -64,7 +65,7 @@ export default function ForgotPassword() {
           headerShadowVisible: false,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={24} color={theme.colors.black} style={{ transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] }} />
+              <Ionicons name="arrow-back" size={24} color={theme.colors.black} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
             </TouchableOpacity>
           ),
         }} 

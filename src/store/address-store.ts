@@ -1,9 +1,9 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuthStore } from '@store/auth-store';
+import { API_ENDPOINTS, makeApiCall } from '@utils/api-config';
 import { Alert } from 'react-native';
-import { makeApiCall, API_ENDPOINTS } from '@utils/api-config';
-import { useAuthStore } from './auth-store';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 // Define Address interface for UI usage
 export interface Address {
@@ -214,10 +214,7 @@ export const useAddressStore = create<AddressStore>()(
 
           const response = await makeApiCall(API_ENDPOINTS.editAddress, {
             method: 'POST',
-            data: formData,
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
+            data: formData
           });
 
           console.log('Add address API response:', response);
@@ -302,10 +299,7 @@ export const useAddressStore = create<AddressStore>()(
 
           const response = await makeApiCall(API_ENDPOINTS.editAddress, {
             method: 'POST',
-            data: formData,
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
+            data: formData
           });
 
           console.log('Update address API response:', response);

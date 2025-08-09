@@ -1,4 +1,4 @@
-import { t } from '@/i18n';
+import { useTranslation } from '@/i18n/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@theme';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
@@ -26,6 +26,7 @@ interface OrderData {
 }
 
 export default function OrderSuccessScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams();
   const [orderData, setOrderData] = useState<OrderData | null>(null);

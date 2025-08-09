@@ -1,4 +1,4 @@
-import { t } from '@/i18n';
+import { useTranslation } from '@/i18n/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@theme';
 import { useRouter } from 'expo-router';
@@ -7,6 +7,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function OrderFailureScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const handleTryAgain = () => {

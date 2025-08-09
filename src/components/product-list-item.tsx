@@ -1,8 +1,8 @@
+import { useTranslation } from '@/i18n/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { useCartStore } from '@store/cart-store';
 import { theme } from '@theme';
 import { getAbsolutePosition, getFlexDirection, getTextAlign } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
 import { Link, router } from 'expo-router';
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useToast } from 'react-native-toast-notifications';

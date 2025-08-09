@@ -314,6 +314,15 @@ export const translations = {
     'checkout.noPaymentMethods': 'No payment methods available for your address',
     'checkout.addAddressForPayment': 'Please add an address to see payment methods',
     'checkout.paymentMethodsTitle': 'PAYMENT METHODS',
+
+    // Additional i18n keys
+    'account.confirmLogout': 'Are you sure you want to logout?',
+    'account.fetchProfileError': 'Failed to fetch user profile. Please try again.',
+    'search.typeMinChars': 'Type at least {0} characters to search',
+    'error.failedToLoadContent': 'Failed to load content',
+    'error.timeout': 'Request timed out. Please try again.',
+    'error.generic': 'An error occurred. Please try again.',
+    'error.noConnection': 'No internet connection. Please check your network and try again.',
   },
   ar: {
     // Language Selection
@@ -629,32 +638,16 @@ export const translations = {
     'checkout.noPaymentMethods': 'لا توجد طرق دفع متاحة لعنوانك',
     'checkout.addAddressForPayment': 'يرجى إضافة عنوان لرؤية طرق الدفع',
     'checkout.paymentMethodsTitle': 'طرق الدفع',
+
+    // Additional i18n keys
+    'account.confirmLogout': 'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+    'account.fetchProfileError': 'فشل في جلب ملف المستخدم. يرجى المحاولة مرة أخرى.',
+    'search.typeMinChars': 'اكتب على الأقل {0} أحرف للبحث',
+    'error.failedToLoadContent': 'فشل تحميل المحتوى',
+    'error.timeout': 'انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.',
+    'error.generic': 'حدث خطأ. يرجى المحاولة مرة أخرى.',
+    'error.noConnection': 'لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مرة أخرى.',
   }
 } as const;
 
 export type TranslationKeys = keyof typeof translations['en']; // Infer keys from English translations
-
-// Lightweight translation hook aligned with language store
-import { useLanguageStore } from '@store/language-store';
-import React from 'react';
-
-function formatWithPlaceholders(template: string, values?: Array<string | number>): string {
-  if (!values || values.length === 0) return template
-  return values.reduce((acc: string, value, index) => acc.replace(new RegExp(`\\{${index}\\}`, 'g'), String(value)), template)
-}
-
-function translateFor(lang: 'en' | 'ar', key: TranslationKeys, params?: Array<string | number>): string {
-  const dict = translations[lang]
-  const fallbackDict = translations.en
-  const raw = (dict[key] ?? fallbackDict[key] ?? key) as unknown as string
-  return formatWithPlaceholders(raw, params)
-}
-
-export function useTranslation() {
-  const currentLanguage = useLanguageStore((s) => s.currentLanguage)
-  const t = React.useCallback(
-    (key: TranslationKeys, params?: Array<string | number>) => translateFor(currentLanguage, key, params),
-    [currentLanguage]
-  )
-  return { t, currentLanguage }
-}

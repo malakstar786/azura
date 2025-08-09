@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@store/auth-store';
@@ -5,19 +6,18 @@ import { useLanguageStore } from '@store/language-store';
 import { API_BASE_URL, API_ENDPOINTS, getCurrentOCSESSID } from '@utils/api-config';
 import { appendLanguageParam } from '@utils/api-language';
 import { getFlexDirection } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface Order {

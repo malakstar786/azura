@@ -40,6 +40,7 @@ export const publicApi = {
         throw new Error(`Invalid features block number: ${blockNumber}`);
     }
     
+    const language = getCurrentLanguage();
     console.log(`Making featuresBlock ${blockNumber} API call with language: ${language}`);
     return makeApiCall<any>(endpoint);
   },

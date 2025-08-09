@@ -1,4 +1,4 @@
-import { t } from '@/i18n';
+import { useTranslation } from '@/i18n/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@store/auth-store';
 import { theme } from '@theme';
@@ -22,6 +22,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Auth() {
+    const { t } = useTranslation();
     const { login, signup, isAuthenticated } = useAuthStore();
     const [isLogin, setIsLogin] = useState(true);
     const [isLoading, setIsLoading] = useState(false);

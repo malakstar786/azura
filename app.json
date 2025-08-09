@@ -39,14 +39,6 @@
             "backgroundColor": "#000000"
           }
         }
-      ],
-      [
-        "@sentry/react-native/expo",
-        {
-          "url": "https://sentry.io/",
-          "project": "azura-expo",
-          "organization": "malakstar-software-solutions"
-        }
       ]
     ],
     "experiments": {

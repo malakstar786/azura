@@ -1,4 +1,4 @@
-import { useLanguageStore } from '@/store/language-store'
+import { useLanguageStore } from '@store/language-store'
 
 export function appendLanguageParam(url: string): string {
   const language = useLanguageStore.getState().currentLanguage

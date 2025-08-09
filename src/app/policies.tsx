@@ -1,21 +1,22 @@
-import { t } from '@/i18n';
+import { useTranslation } from '@/i18n/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@theme';
 import { getFlexDirection } from '@utils/rtlStyles';
 import { Stack, router } from 'expo-router';
 import React from 'react';
 import {
-    I18nManager,
-    Linking,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PoliciesScreen() {
+  const { t } = useTranslation();
+  const isRTL = require('@store/language-store').useLanguageStore.getState().isRTL as boolean;
   
   const handlePolicyPress = async (url: string) => {
     try {
@@ -38,7 +39,7 @@ export default function PoliciesScreen() {
           headerShadowVisible: false,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={24} color={theme.colors.black} style={{ transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] }} />
+              <Ionicons name="arrow-back" size={24} color={theme.colors.black} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
             </TouchableOpacity>
           ),
         }}

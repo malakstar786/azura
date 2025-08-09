@@ -1,11 +1,11 @@
+import { useTranslation } from '@/i18n/useTranslation';
+import { theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@store/auth-store';
 import { useCartStore } from '@store/cart-store';
 import { useLanguageStore } from '@store/language-store';
-import { theme } from '@theme';
 import { CartItem } from '@utils/api-config';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
 import { Link, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';

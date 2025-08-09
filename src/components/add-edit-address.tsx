@@ -1,10 +1,10 @@
+import { useTranslation } from '@/i18n/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { useAddressStore } from '@store/address-store';
 import { useAuthStore } from '@store/auth-store';
 import { theme } from '@theme';
 import { Country, Governorate, LocationService, Zone } from '@utils/location-service';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,

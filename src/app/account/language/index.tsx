@@ -1,8 +1,8 @@
+import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useLanguageStore } from '@store/language-store';
 import { getFlexDirection } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

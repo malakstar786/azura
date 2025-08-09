@@ -1,4 +1,4 @@
-import { t } from '@/i18n';
+import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@/theme';
 import { useLanguageStore } from '@store/language-store';
 import { router, usePathname } from 'expo-router';
@@ -11,6 +11,7 @@ type Props = {
 };
 
 export default function RouteErrorFallback({ error }: Props) {
+  const { t } = useTranslation();
   const isRTL = useLanguageStore((s) => s.isRTL);
   const pathname = usePathname();
 

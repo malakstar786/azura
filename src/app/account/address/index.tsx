@@ -1,3 +1,4 @@
+import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@/theme';
 import AddEditAddress from '@components/add-edit-address';
 import { Ionicons } from '@expo/vector-icons';
@@ -5,7 +6,6 @@ import { Address, useAddressStore } from '@store/address-store';
 import { useAuthStore } from '@store/auth-store';
 import { useLanguageStore } from '@store/language-store';
 import { getFlexDirection } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';

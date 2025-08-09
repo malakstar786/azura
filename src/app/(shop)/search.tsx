@@ -1,9 +1,9 @@
+import { useTranslation } from '@/i18n/useTranslation';
+import { theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useLanguageStore } from '@store/language-store';
-import { theme } from '@theme';
 import { publicApi } from '@utils/api-service';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -195,7 +195,7 @@ export default function SearchScreen() {
             {t('search.placeholder')}
           </Text>
           <Text style={[styles.emptySearchSubtext, { textAlign: getTextAlign() }]}>
-            Type at least 2 characters to search
+            {t('search.typeMinChars', [2])}
           </Text>
         </View>
       )}

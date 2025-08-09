@@ -1,11 +1,11 @@
+import { useTranslation } from "@/i18n/useTranslation";
+import { theme } from "@/theme";
 import DrawerMenu from "@components/DrawerMenu";
 import { Ionicons } from '@expo/vector-icons';
 import { useLanguageStore } from "@store/language-store";
-import { theme } from "@theme";
 import { NETWORK_ERROR_CODES } from "@utils/api-config";
 import { publicApi } from "@utils/api-service";
 import { getFlexDirection } from '@utils/rtlStyles';
-import { useTranslation } from "@utils/translations";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -100,13 +100,13 @@ export default function HomeScreen() {
 
   const getErrorMessage = (error: any) => {
     if (error.code === NETWORK_ERROR_CODES.NO_CONNECTION) {
-      return 'No internet connection. Please check your network and try again.';
+      return t('error.noConnection');
     } else if (error.code === NETWORK_ERROR_CODES.TIMEOUT) {
-      return 'Request timed out. Please try again.';
+      return t('error.timeout');
     } else if (error.code === NETWORK_ERROR_CODES.SERVER_ERROR) {
-      return 'Server error. Please try again later.';
+      return t('error.serverError');
     }
-    return 'An error occurred. Please try again.';
+    return t('error.generic');
   };
 
   useEffect(() => {
@@ -173,7 +173,7 @@ export default function HomeScreen() {
       !featureBlocks.block3 || !featureBlocks.block4 || !featureBlocks.block5) {
   return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error || 'Failed to load content'}</Text>
+        <Text style={styles.errorText}>{error || t('error.failedToLoadContent')}</Text>
       </View>
     );
   }

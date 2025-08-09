@@ -1,10 +1,10 @@
+import { useTranslation } from '@/i18n/useTranslation';
 import EditUserDetails from '@components/edit-user-details';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@store/auth-store';
 import { useLanguageStore } from '@store/language-store';
 import { theme } from '@theme';
 import { API_ENDPOINTS, makeApiCall } from '@utils/api-config';
-import { useTranslation } from '@utils/translations';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {

@@ -1,4 +1,4 @@
-import { t } from '@/i18n';
+import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@theme';
 import { Link, Stack } from 'expo-router';
 import React from 'react';
@@ -6,6 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NotFoundScreen() {
+  const { t } = useTranslation();
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ title: '' }} />

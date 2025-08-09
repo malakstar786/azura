@@ -1,8 +1,8 @@
+import { useTranslation } from '@/i18n/useTranslation';
+import { theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useCartStore } from '@store/cart-store';
 import { useLanguageStore } from '@store/language-store';
-import { theme } from '@theme';
-import { useTranslation } from '@utils/translations';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';

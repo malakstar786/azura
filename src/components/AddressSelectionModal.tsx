@@ -1,4 +1,4 @@
-import { t } from '@/i18n';
+import { useTranslation } from '@/i18n/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { Address } from '@store/address-store';
 import { theme } from '@theme';
@@ -22,6 +22,7 @@ export default function AddressSelectionModal({
   onSelect,
   onClose,
 }: AddressSelectionModalProps) {
+  const { t } = useTranslation();
   const getAddressText = (address: Address) => {
     return `${t('address.block')} ${address.block}, ${t('address.street')} ${address.street}, ${t('address.building')} ${address.houseNumber}${
       address.apartmentNumber ? `, ${t('address.apartment')} ${address.apartmentNumber}` : ''

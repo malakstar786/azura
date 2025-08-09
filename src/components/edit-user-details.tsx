@@ -1,7 +1,7 @@
+import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@/theme';
 import { useAuthStore } from '@store/auth-store';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
 import React, { useState } from 'react';
 import {
     Alert,

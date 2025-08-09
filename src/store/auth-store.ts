@@ -1,17 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCartStore } from '@store/cart-store';
 import {
-    API_BASE_URL,
-    API_ENDPOINTS,
-    generateRandomOCSESSID,
-    getOrCreateOCSESSID,
-    makeApiCall,
-    NETWORK_ERROR_CODES,
-    setOCSESSID
+  API_BASE_URL,
+  API_ENDPOINTS,
+  generateRandomOCSESSID,
+  getOrCreateOCSESSID,
+  makeApiCall,
+  NETWORK_ERROR_CODES,
+  setOCSESSID
 } from '@utils/api-config';
 import { Alert } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { useCartStore } from './cart-store';
 
 export interface Address {
   address_id: string;
@@ -204,9 +204,6 @@ export const useAuthStore = create<AuthState>()(
           try {
             const response = await makeApiCall(API_ENDPOINTS.register, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
               data: signupData
             });
 

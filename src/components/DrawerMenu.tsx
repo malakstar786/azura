@@ -1,9 +1,9 @@
+import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useLanguageStore } from '@store/language-store';
 import { publicApi } from '@utils/api-service';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
-import { useTranslation } from '@utils/translations';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
