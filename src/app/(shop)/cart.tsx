@@ -416,6 +416,13 @@ export default function CartScreen() {
   );
 }
 
+// Route-level ErrorBoundary for this high-risk route
+export function ErrorBoundary({ error }: { error: Error }) {
+  // Lazy import to avoid circular deps during SSR
+  const Fallback = require('@components/RouteErrorFallback').default;
+  return <Fallback error={error} />;
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

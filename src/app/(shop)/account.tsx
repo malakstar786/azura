@@ -367,6 +367,11 @@ export default function AccountScreen() {
   );
 }
 
+export function ErrorBoundary({ error }: { error: Error }) {
+  const Fallback = require('@components/RouteErrorFallback').default;
+  return <Fallback error={error} />;
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

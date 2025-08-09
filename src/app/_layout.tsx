@@ -1,5 +1,6 @@
 import ErrorBoundary from '@components/ErrorBoundary';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Sentry from '@sentry/react-native';
 import { useLanguageStore } from '@store/language-store';
 import { theme } from '@theme';
 import { getOrCreateOCSESSID } from '@utils/api-config';
@@ -15,7 +16,24 @@ SplashScreen.preventAutoHideAsync().catch(() => {
   /* ignore error */
 });
 
-export default function RootLayout() {
+// Initialize Sentry as early as possible in the app lifecycle
+Sentry.init({
+  dsn: 'https://dc70f4727ce6f5731cf5b126b02b3f7b@o4509813436055552.ingest.de.sentry.io/4509813455519824',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  spotlight: __DEV__,
+});
+
+function RootLayout() {
   const [isReady, setIsReady] = useState(false);
   const { isFirstTimeUser, isRTL, init, isLoading, checkAndSetNavigationLock } = useLanguageStore();
   const router = useRouter();
@@ -175,3 +193,5 @@ export default function RootLayout() {
     </ToastProvider>
   );
 }
+
+export default Sentry.wrap(RootLayout);
