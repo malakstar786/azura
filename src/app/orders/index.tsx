@@ -2,20 +2,20 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@store/auth-store';
 import { useLanguageStore } from '@store/language-store';
+import { useOrderStore } from '@store/order-store';
 import { theme } from '@theme';
-import { getCurrentOCSESSID } from '@utils/api-config';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import { router, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface Order {
@@ -33,11 +33,9 @@ export default function OrdersScreen() {
   const { t } = useTranslation();
   const { isRTL } = useLanguageStore();
   const { isAuthenticated, user } = useAuthStore();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const { orders, isLoading, error, fetchOrders } = useOrderStore();
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const getStatusColor = (status: string) => {
@@ -58,52 +56,7 @@ export default function OrdersScreen() {
     }
   };
 
-  const fetchOrders = async () => {
-    if (!isAuthenticated) {
-      setError(t('cart.loginRequired'));
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const sessionId = getCurrentOCSESSID();
-      const response = await fetch(
-        'https://new.azurakwt.com/index.php?route=extension/mstore/order|all',
-        {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Cookie': `OCSESSID=${sessionId}`,
-            'User-Agent': 'Azura Mobile App',
-          },
-        }
-      );
-
-      // Check if response is JSON before parsing
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Server returned non-JSON response. Please try again later.');
-      }
-
-      const data = await response.json();
-      
-      if (data.success === 1) {
-        const ordersList = data.data || [];
-        setOrders(ordersList);
-        setFilteredOrders(ordersList);
-      } else {
-        throw new Error(data.error?.join(', ') || t('error.serverError'));
-      }
-    } catch (err: any) {
-      console.error('Error fetching orders:', err);
-      setError(err.message || t('error.networkError'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // useOrderStore().fetchOrders is used instead of ad-hoc fetch logic
 
   const onRefresh = async () => {
     setRefreshing(true);

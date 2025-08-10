@@ -58,35 +58,16 @@ export const useOrderStore = create<OrderStore>((set) => ({
 
       if (response.success === 1 && Array.isArray(response.data)) {
         console.log(`📊 ORDER STORE: Received ${response.data.length} orders from API`);
-        
-        // Filter orders to only show the current user's orders as a safety measure
-        // This handles cases where the API might return other users' orders
-        const currentUserOrders = response.data.filter((order: Order) => {
-          const orderName = `${order.firstname?.toLowerCase()} ${order.lastname?.toLowerCase()}`.trim();
-          const userName = `${user.firstname?.toLowerCase()} ${user.lastname?.toLowerCase()}`.trim();
-          
-          return orderName === userName;
-        });
 
-        console.log(`🎯 ORDER STORE: Filtered to ${currentUserOrders.length} orders for current user`);
-        
-        // Process orders to ensure all required fields are present
-        const enhancedOrders = currentUserOrders.map((order: Order) => {
-          return {
-            ...order,
-            // Ensure required fields have default values if missing
-            status: order.status || 'Processing',
-            currency_code: order.currency_code || 'KWD',
-            currency_value: order.currency_value || '1.000'
-          };
-        });
+        // No client-side filtering. Show exactly what the backend returns.
+        const enhancedOrders = response.data.map((order: Order) => ({
+          ...order,
+          status: order.status || 'Processing',
+          currency_code: order.currency_code || 'KWD',
+          currency_value: order.currency_value || '1.000',
+        }));
 
-        console.log('✅ ORDER STORE: Final processed orders:', enhancedOrders);
-
-        set({ 
-          orders: enhancedOrders, 
-          isLoading: false 
-        });
+        set({ orders: enhancedOrders, isLoading: false });
       } else {
         console.warn('❌ ORDER STORE: No orders received or invalid format:', response);
         set({ 

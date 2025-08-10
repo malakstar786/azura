@@ -150,8 +150,6 @@ export default function Auth() {
         telephone: signupForm.telephone.trim(),
         password: signupForm.password,
       };
-
-      console.log('📤 AUTH.TSX: Sending signup request with userData:', JSON.stringify(userData, null, 2));
       
       try {
         await signup(userData);

@@ -404,14 +404,24 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
             </View>
           ) : (
               <FlatList
-              data={Array.isArray(data) ? uniqueBy<any, string | number>(data, (it: any) =>
-                (it && (it.country_id || it.governorate_id || it.zone_id)) ?? JSON.stringify(it)
-              ) : []}
+              data={Array.isArray(data)
+                ? uniqueBy<any, string | number>(
+                    data,
+                    (it: any) => {
+                      if (it && typeof it === 'object') {
+                        if ('zone_id' in it) return (it as Zone).zone_id;
+                        if ('governorate_id' in it) return (it as Governorate).governorate_id;
+                        if ('country_id' in it) return (it as Country).country_id;
+                      }
+                      return JSON.stringify(it);
+                    }
+                  )
+                : []}
               keyExtractor={(item, index) => {
                 if (typeof item === 'object' && item) {
-                  if ('country_id' in item) return `country-${(item as Country).country_id}`;
-                  if ('governorate_id' in item) return `governorate-${(item as Governorate).governorate_id}`;
                   if ('zone_id' in item) return `area-${(item as Zone).zone_id}`;
+                  if ('governorate_id' in item) return `governorate-${(item as Governorate).governorate_id}`;
+                  if ('country_id' in item) return `country-${(item as Country).country_id}`;
                 }
                 return `${title}-${index}`;
               }}
