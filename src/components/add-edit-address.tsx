@@ -7,24 +7,33 @@ import { Country, Governorate, LocationService, Zone } from '@utils/location-ser
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    FlatList,
-    I18nManager,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  FlatList,
+  I18nManager,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+function uniqueBy<T, K extends string | number>(items: T[], keyFn: (item: T) => K): T[] {
+  const map = new Map<K, T>();
+  for (const item of items) {
+    const key = keyFn(item);
+    if (!map.has(key)) map.set(key, item);
+  }
+  return Array.from(map.values());
+}
 
 interface FormData {
   firstname: string;
@@ -171,10 +180,11 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
     try {
       setLoadingCountries(true);
       const countriesData = await LocationService.getCountries();
-      setCountries(countriesData);
+      const uniqueCountries = uniqueBy<Country, string>(countriesData, (c) => c.country_id);
+      setCountries(uniqueCountries);
       
       // Set Kuwait as default if available
-      const kuwait = countriesData.find((c: Country) => c.country_id === '114');
+      const kuwait = uniqueCountries.find((c: Country) => c.country_id === '114');
       if (kuwait) {
         setSelectedCountry(kuwait);
       }
@@ -190,7 +200,8 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
     try {
       setLoadingGovernorates(true);
       const locationData = await LocationService.getGovernoratesAndAreas(countryId);
-      setGovernorates(locationData.governorates || []);
+      const uniqueGovernorates = uniqueBy<Governorate, string>(locationData.governorates || [], (g) => g.governorate_id);
+      setGovernorates(uniqueGovernorates);
       setAreas([]); // Clear areas when country changes
       setSelectedGovernorate(null);
       setSelectedArea(null);
@@ -206,7 +217,8 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
     try {
       setLoadingAreas(true);
       const areasData = await LocationService.getAreasByGovernorate(formData.country_id, governorateId);
-      setAreas(areasData);
+      const uniqueAreas = uniqueBy<Zone, string>(areasData, (a) => a.zone_id);
+      setAreas(uniqueAreas);
       setSelectedArea(null);
     } catch (error) {
       console.error('Error loading areas:', error);
@@ -391,13 +403,15 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
               <ActivityIndicator size="large" color={theme.colors.black} />
             </View>
           ) : (
-            <FlatList
-              data={data}
+              <FlatList
+              data={Array.isArray(data) ? uniqueBy<any, string | number>(data, (it: any) =>
+                (it && (it.country_id || it.governorate_id || it.zone_id)) ?? JSON.stringify(it)
+              ) : []}
               keyExtractor={(item, index) => {
                 if (typeof item === 'object' && item) {
-                  if ('country_id' in item) return `country-${(item as Country).country_id || index}`;
-                  if ('governorate_id' in item) return `governorate-${(item as Governorate).governorate_id || index}`;
-                  if ('zone_id' in item) return `area-${(item as Zone).zone_id || index}`;
+                  if ('country_id' in item) return `country-${(item as Country).country_id}`;
+                  if ('governorate_id' in item) return `governorate-${(item as Governorate).governorate_id}`;
+                  if ('zone_id' in item) return `area-${(item as Zone).zone_id}`;
                 }
                 return `${title}-${index}`;
               }}
