@@ -16,13 +16,23 @@ let ApplePay: any;
 let CompleteStatus: any;
 let MerchantCapability: any;
 let PaymentNetwork: any;
+let isApplePayModuleAvailable = false;
 
 if (Platform.OS === 'ios') {
-  const mod = require('apple-pay-react-native-expo');
-  ApplePay = mod.default ?? mod;
-  CompleteStatus = mod.CompleteStatus;
-  MerchantCapability = mod.MerchantCapability;
-  PaymentNetwork = mod.PaymentNetwork;
+  try {
+    const mod = require('apple-pay-react-native-expo');
+    ApplePay = mod.default ?? mod;
+    CompleteStatus = mod.CompleteStatus;
+    MerchantCapability = mod.MerchantCapability;
+    PaymentNetwork = mod.PaymentNetwork;
+    isApplePayModuleAvailable = true;
+  } catch (e) {
+    console.log('Apple Pay error', e);
+    // In development, the native module may not exist in the installed dev client
+    // Avoid crashing the whole screen; gracefully disable Apple Pay until the client is rebuilt
+    console.warn('[ApplePay] Native module not available in this build. Rebuild the dev client to enable Apple Pay.', e);
+    isApplePayModuleAvailable = false;
+  }
 }
 
 export default function CheckoutScreen() {
@@ -94,7 +104,12 @@ export default function CheckoutScreen() {
     console.log('🍏 [ApplePay] Platform:', Platform.OS, Platform.Version);
     console.log('🍏 [ApplePay] User Agent:', navigator?.userAgent || 'N/A');
     
-    // Platform validation
+    // Availability & platform validation
+    if (!isApplePayModuleAvailable) {
+      console.log('❌ [ApplePay] Native module unavailable in this build. Ask user to rebuild dev client.');
+      Alert.alert('Apple Pay Unavailable', 'Reinstall the development build to enable Apple Pay.');
+      return false;
+    }
     if (Platform.OS !== 'ios') {
       console.log('❌ [ApplePay] Platform check failed - not iOS');
       console.log('❌ [ApplePay] Current platform:', Platform.OS);
