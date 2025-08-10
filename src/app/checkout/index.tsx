@@ -7,11 +7,23 @@ import { useCartStore } from '@store/cart-store';
 import { theme } from '@theme';
 import { API_BASE_URL, API_ENDPOINTS, makeApiCall } from '@utils/api-config';
 import { getFlexDirection } from '@utils/rtlStyles';
-import ApplePay, { CompleteStatus, MerchantCapability, PaymentNetwork } from 'apple-pay-react-native-expo';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Image, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { WebView } from 'react-native-webview';
+
+let ApplePay: any;
+let CompleteStatus: any;
+let MerchantCapability: any;
+let PaymentNetwork: any;
+
+if (Platform.OS === 'ios') {
+  const mod = require('apple-pay-react-native-expo');
+  ApplePay = mod.default ?? mod;
+  CompleteStatus = mod.CompleteStatus;
+  MerchantCapability = mod.MerchantCapability;
+  PaymentNetwork = mod.PaymentNetwork;
+}
 
 export default function CheckoutScreen() {
   const { isAuthenticated } = useAuthStore();

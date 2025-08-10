@@ -111,13 +111,11 @@ export default function Auth() {
       const validationErrors: Record<string, string> = {};
       
       if (!signupForm.firstname?.trim()) {
-        validationErrors.firstname = t('validation.fullNameRequired');
+        validationErrors.firstname = t('validation.firstNameRequired');
       }
-      
-      // We don't need lastname validation since we're using firstname for full name
-      // if (!signupForm.lastname?.trim()) {
-      //   validationErrors.lastname = 'Last name is required';
-      // }
+      if (!signupForm.lastname?.trim()) {
+        validationErrors.lastname = t('validation.lastNameRequired');
+      }
       
       if (!signupForm.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupForm.email)) {
         validationErrors.email = t('validation.invalidEmail');
@@ -145,20 +143,9 @@ export default function Auth() {
       setIsLoading(true);
       setErrors({});
       
-      // Parse full name into first name and last name
-      let firstName = signupForm.firstname.trim();
-      let lastName = '';
-
-      // Split the full name by space and handle different cases
-      const nameParts = signupForm.firstname.trim().split(' ');
-      if (nameParts.length > 1) {
-        firstName = nameParts[0];
-        lastName = nameParts.slice(1).join(' ');
-      }
-
       const userData = {
-        firstname: firstName,
-        lastname: lastName,
+        firstname: signupForm.firstname.trim(),
+        lastname: signupForm.lastname.trim(),
         email: signupForm.email.trim(),
         telephone: signupForm.telephone.trim(),
         password: signupForm.password,
@@ -292,13 +279,24 @@ export default function Auth() {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder={t('signup.fullName')}
+            placeholder={t('auth.firstName')}
             value={signupForm.firstname}
             onChangeText={text => handleSignupInputChange('firstname', text)}
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
           />
           {errors.firstname && <Text style={styles.errorText}>{errors.firstname}</Text>}
+        </View>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder={t('auth.lastName')}
+            value={signupForm.lastname}
+            onChangeText={text => handleSignupInputChange('lastname', text)}
+            placeholderTextColor={theme.colors.mediumGray}
+            editable={!isLoading}
+          />
+          {errors.lastname && <Text style={styles.errorText}>{errors.lastname}</Text>}
         </View>
         
         <View style={styles.inputContainer}>
