@@ -69,7 +69,7 @@ export const ProductListItem = ({
           <Image 
             source={{ uri: product.image.startsWith('http') 
               ? product.image 
-              : `https://new.azurakwt.com/image/${product.image}`
+              : `https://azura.com.kw/image/${product.image}`
             }} 
             style={styles.image} 
           />

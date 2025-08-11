@@ -2027,7 +2027,7 @@ ${address.address_2 || ''}`;
                 // Only allow navigation to trusted domains
                 const url = request.url.toLowerCase();
                 const trustedDomains = [
-                  'new.azurakwt.com',
+                  'azura.com.kw',
                   'azura.com.kw',                  // Azura main domain
                   'kpaytest.com.kw',               // KNet test environment
                   'knet.com.kw',                   // KNet production environment  

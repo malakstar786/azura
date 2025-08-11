@@ -8,14 +8,14 @@ import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Dimensions,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useToast } from 'react-native-toast-notifications';
 import type { Product as ApiProduct } from '../../types/api';
@@ -223,7 +223,7 @@ export default function CategoryScreen() {
         onPress={() => router.push(`/product/${item.product_id}`)}
       >
         <Image
-          source={{ uri: `https://new.azurakwt.com/image/${item.image}` }}
+          source={{ uri: `https://azura.com.kw/image/${item.image}` }}
           style={styles.productImage}
           resizeMode="cover"
         />

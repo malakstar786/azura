@@ -206,7 +206,7 @@ const ProductDetails = () => {
       )}
 
       <Image 
-        source={{ uri: `https://new.azurakwt.com/image/${product.image}` }} 
+        source={{ uri: `https://azura.com.kw/image/${product.image}` }} 
         style={styles.productImage} 
       />
 

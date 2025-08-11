@@ -49,7 +49,7 @@ export default function LanguageScreen() {
     <SafeAreaView style={styles.container}>
       <Stack.Screen 
         options={{ 
-          title: t('account.language'),
+          title: '',
           headerStyle: { backgroundColor: theme.colors.white },
           headerShadowVisible: false,
           headerLeft: () => (

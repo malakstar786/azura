@@ -10,16 +10,16 @@ import { Link, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import {
-    Alert,
-    Dimensions,
-    FlatList,
-    Image,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Dimensions,
+  FlatList,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 // Import the empty cart icon
@@ -41,11 +41,11 @@ const getImageUrl = (item: CartItem): string => {
   // If it's a relative path, construct the full URL
   // Handle different possible formats from the API
   if (imageSource.startsWith('cache/') || imageSource.startsWith('catalog/')) {
-    return `https://new.azurakwt.com/image/${imageSource}`;
+    return `https://azura.com.kw/image/${imageSource}`;
   }
   
   // For simple filenames, try the cache path first
-  return `https://new.azurakwt.com/image/cache/catalog/productsimage/${imageSource}`;
+  return `https://azura.com.kw/image/cache/catalog/productsimage/${imageSource}`;
 };
 
 const { width } = Dimensions.get('window');
@@ -82,13 +82,13 @@ const DeleteConfirmationModal = ({ visible, onClose, onConfirm, item }: DeleteMo
             />
             <View style={styles.deleteModalItemDetails}>
               <Text style={styles.deleteModalSku}>
-                SKU:{item.sku || item.product_id}
+                {t('order.sku')} {item.sku || item.product_id}
               </Text>
               <Text style={styles.deleteModalItemTitle}>
                 {item.name.toUpperCase()}
               </Text>
               <Text style={styles.deleteModalQuantity}>
-                QTY: {item.quantity}
+                {t('order.qty')} {item.quantity}
               </Text>
               <Text style={styles.deleteModalPrice}>
                 {item.total || (parseFloat(item.price.replace(/[^\d.]/g, '')) * Number(item.quantity)).toFixed(3)} KD
@@ -188,7 +188,7 @@ const CartItemRow = ({
       />
       <View style={[styles.itemDetails, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
         <Text style={[styles.itemSku, { textAlign: getTextAlign() }]}>
-          SKU: {item.sku || item.product_id}
+          {t('order.sku')} {item.sku || item.product_id}
         </Text>
         <Text style={[styles.itemTitle, { textAlign: getTextAlign() }]}>
           {item.name.toUpperCase()}
@@ -203,7 +203,7 @@ const CartItemRow = ({
           </TouchableOpacity>
           <View style={styles.quantityDisplay}>
             <Text style={[styles.itemQuantity, isUpdating && styles.disabledText]}>
-              QTY: {item.quantity}
+              {t('order.qty')} {item.quantity}
             </Text>
             <TouchableOpacity 
               style={[styles.quantityDropdown, isUpdating && styles.disabledButton]}
@@ -408,7 +408,7 @@ export default function CartScreen() {
           <Text style={styles.totalLabel}>{t('cart.total')} : {getTotalPrice().toFixed(3)} KD</Text>
         </View>
         <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
-                      <Text style={styles.checkoutButtonText}>{t('cart.checkout')}</Text>
+          <Text style={styles.checkoutButtonText}>{t('cart.checkout')}</Text>
           <Ionicons name={isRTL ? "arrow-back" : "arrow-forward"} size={20} color={theme.colors.white} />
         </TouchableOpacity>
       </View>
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold as any,
     color: theme.colors.black,
     flex: 1,
-    paddingStart: 20,
+    // paddingStart: 20,
   },
   dividerContainer: {
     paddingHorizontal: theme.spacing.md,

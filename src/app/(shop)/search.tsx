@@ -17,6 +17,8 @@ interface Product {
   stock_status: string;
   date_added: string;
   category_id: string;
+  // Align with category listing logic: rely on numeric quantity to determine stock
+  quantity?: number | string;
 }
 
 
@@ -30,7 +32,7 @@ const SearchResultItem = ({ product }: { product: Product }) => {
       onPress={() => router.push(`/product/${product.product_id}` as any)}
     >
       <Image 
-        source={{ uri: `https://new.azurakwt.com/image/${product.image}` }} 
+        source={{ uri: `https://azura.com.kw/image/${product.image}` }} 
         style={styles.productImage} 
       />
       <View style={[styles.productInfo, { alignItems: getTextAlign() === 'left' ? 'flex-start' : 'flex-end' }]}>
@@ -41,7 +43,7 @@ const SearchResultItem = ({ product }: { product: Product }) => {
           {product.price}
         </Text>
         <Text style={[styles.productStock, { textAlign: getTextAlign() }]}>
-          {product.stock_status === "2-3 Days" ? t('product.inStock') : t('product.outOfStock')}
+          {Number(product.quantity) > 0 ? t('product.inStock') : t('product.outOfStock')}
         </Text>
       </View>
       <Ionicons 
@@ -84,7 +86,12 @@ export default function SearchScreen() {
       try {
         const response = await publicApi.getAllProducts();
         if (response.success === 1 && response.data) {
-          setAllProducts(response.data.products || []);
+          const products: Product[] = (response.data.products || []).map((p: any) => ({
+            ...p,
+            // normalize quantity as number; fall back to 0 when missing
+            quantity: typeof p.quantity === 'string' || typeof p.quantity === 'number' ? Number(p.quantity) : 0,
+          }));
+          setAllProducts(products);
           setProductsLoaded(true);
         } else {
           setError(Array.isArray(response.error) ? response.error[0] : t('common.error'));
@@ -118,7 +125,17 @@ export default function SearchScreen() {
       product.product_id.toLowerCase().includes(searchLower)
     );
     
-    setFilteredProducts(filtered);
+    // Sort by stock first (in stock first) then by recency similar to category page new arrivals logic
+    const sorted = filtered.slice().sort((a, b) => {
+      const aInStock = Number(a.quantity) > 0 ? 1 : 0;
+      const bInStock = Number(b.quantity) > 0 ? 1 : 0;
+      if (aInStock !== bInStock) return bInStock - aInStock;
+      const aDate = new Date(a.date_added).getTime();
+      const bDate = new Date(b.date_added).getTime();
+      return bDate - aDate;
+    });
+
+    setFilteredProducts(sorted);
   }, [debouncedQuery, allProducts, productsLoaded]);
 
   const handleSearch = (text: string) => {

@@ -384,8 +384,8 @@ Test Credentials:
         "tax": "22.500 KD",
         "rating": 0,
         "reviews": 0,
-        "href": "https://new.azurakwt.com/en-gb/product/Agarwood",
-        "thumb": "https://new.azurakwt.com/image/cache/catalog/productsimage/agarwood/Image%202%20(4)-228x228.png",
+        "href": "https://azura.com.kw/en-gb/product/Agarwood",
+        "thumb": "https://azura.com.kw/image/cache/catalog/productsimage/agarwood/Image%202%20(4)-228x228.png",
         "images": ["image1.png", "image2.png"]
       }
     ],
@@ -844,7 +844,7 @@ default: 1
     "success": 1,
     "error": [],
   "data": {
-    "action": "https://new.azurakwt.com/en-gb?route=common/currency|save",
+    "action": "https://azura.com.kw/en-gb?route=common/currency|save",
     "code": "KWD",
     "currencies": [
       {
@@ -852,18 +852,18 @@ default: 1
         "code": "BHD",
         "symbol_left": "",
         "symbol_right": "KD",
-        "image": "https://new.azurakwt.com/image/catalog/flags/BRN.png"
+        "image": "https://azura.com.kw/image/catalog/flags/BRN.png"
       },
       {
         "title": "KWT",
         "code": "KWD",
         "symbol_left": "",
         "symbol_right": "KD",
-        "image": "https://new.azurakwt.com/image/catalog/flags/KWT.png"
+        "image": "https://azura.com.kw/image/catalog/flags/KWT.png"
       }
     ],
     "selected_currency_title": "KWT",
-    "selected_currency_image": "https://new.azurakwt.com/image/catalog/flags/KWT.png",
+    "selected_currency_image": "https://azura.com.kw/image/catalog/flags/KWT.png",
     "selected_currency_code": "KWD",
     "selected_currency_symbol_left": "",
     "selected_currency_symbol_right": "KD"

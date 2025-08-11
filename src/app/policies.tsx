@@ -52,7 +52,7 @@ export default function PoliciesScreen() {
         <View style={styles.policiesContainer}>
           <TouchableOpacity
             style={styles.policyOption}
-            onPress={() => handlePolicyPress('https://new.azurakwt.com/en-gb/information/about-us')}
+            onPress={() => handlePolicyPress('https://azura.com.kw/en-gb/information/about-us')}
           >
             <Text style={styles.policyText}>{t('policies.aboutUs')}</Text>
             <Ionicons name="open-outline" size={20} color={theme.colors.black} />
@@ -60,7 +60,7 @@ export default function PoliciesScreen() {
 
           <TouchableOpacity
             style={styles.policyOption}
-            onPress={() => handlePolicyPress('https://new.azurakwt.com/en-gb?route=information/contact')}
+            onPress={() => handlePolicyPress('https://azura.com.kw/en-gb?route=information/contact')}
           >
             <Text style={styles.policyText}>{t('policies.contactUs')}</Text>
             <Ionicons name="open-outline" size={20} color={theme.colors.black} />
@@ -68,7 +68,7 @@ export default function PoliciesScreen() {
 
           <TouchableOpacity
             style={styles.policyOption}
-            onPress={() => handlePolicyPress('https://new.azurakwt.com/en-gb/information/terms')}
+            onPress={() => handlePolicyPress('https://azura.com.kw/en-gb/information/terms')}
           >
             <Text style={styles.policyText}>{t('policies.terms')}</Text>
             <Ionicons name="open-outline" size={20} color={theme.colors.black} />
@@ -76,7 +76,7 @@ export default function PoliciesScreen() {
 
           <TouchableOpacity
             style={styles.policyOption}
-            onPress={() => handlePolicyPress('https://new.azurakwt.com/en-gb/information/privacy')}
+            onPress={() => handlePolicyPress('https://azura.com.kw/en-gb/information/privacy')}
           >
             <Text style={styles.policyText}>{t('policies.privacy')}</Text>
             <Ionicons name="open-outline" size={20} color={theme.colors.black} />
