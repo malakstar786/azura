@@ -2133,12 +2133,13 @@ const styles = StyleSheet.create({
   editAddressButton: {
     flexDirection: getFlexDirection('row'),
     alignItems: 'center',
-    alignSelf: 'flex-start',
+    justifyContent: 'center',
+    alignSelf: 'stretch',
     marginTop: 18,
     borderTopWidth: 2,
     borderColor: theme.colors.black,
     paddingVertical: 12,
-    paddingHorizontal: 115,
+    paddingHorizontal: 0,
   },
   editAddressText: {
     fontSize: 15,
