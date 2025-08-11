@@ -199,7 +199,7 @@ export default function OrdersScreen() {
     <View style={styles.container}>
       <Stack.Screen
         options={{
-          title: t('orders.title'),
+          title: '',
           headerBackTitle: '',
           headerTintColor: theme.colors.black,
         }}

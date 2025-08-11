@@ -16,6 +16,7 @@ export default function CategoryLayout() {
         name='[slug]'
         options={({ navigation }) => ({
           headerShown: true,
+          headerTitle: '',
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={24} color='black' />

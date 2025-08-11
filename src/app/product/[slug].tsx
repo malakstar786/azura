@@ -7,14 +7,14 @@ import { getFlexDirection } from '@utils/rtlStyles';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Dimensions,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useToast } from 'react-native-toast-notifications';
 
@@ -48,6 +48,7 @@ const ProductDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const { items, addToCart, incrementQuantity, decrementQuantity } = useCartStore();
   const cartItem = items.find(item => item.product_id === slug);
@@ -221,12 +222,19 @@ const ProductDetails = () => {
           <>
             <View style={styles.descriptionContainer}>
               <Text style={styles.description}>
-                {product.description.replace(/<\/?[^>]+(>|$)/g, "")}
+                {(() => {
+                  const plain = product.description.replace(/<\/?[^>]+(>|$)/g, "");
+                  if (isDescriptionExpanded) return plain;
+                  const preview = plain.slice(0, 100);
+                  return plain.length > 100 ? `${preview}…` : preview;
+                })()}
               </Text>
             </View>
-            <TouchableOpacity>
-              <Text style={styles.readMore}>READ MORE</Text>
-            </TouchableOpacity>
+            {product.description.replace(/<\/?[^>]+(>|$)/g, "").length > 100 && (
+              <TouchableOpacity onPress={() => setIsDescriptionExpanded(v => !v)}>
+                <Text style={styles.readMore}>{isDescriptionExpanded ? 'READ LESS' : 'READ MORE'}</Text>
+              </TouchableOpacity>
+            )}
           </>
         ) : null}
 

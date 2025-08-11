@@ -71,29 +71,6 @@ interface Product extends ApiProduct {
   options: any[];
 }
 
-interface ProductResponse {
-  product_total: number;
-  products: Product[];
-}
-
-interface ApiResponse {
-  success: number;
-  error: string[] | undefined;
-  data: ProductResponse | Product[];
-}
-
-interface FeaturesBlock {
-  image: string;
-  heading: string;
-  desc: string;
-}
-
-interface FeaturesResponse {
-  success: number;
-  error: string[];
-  data: FeaturesBlock;
-}
-
 export default function CategoryScreen() {
   const { slug } = useLocalSearchParams();
   const [isLoading, setIsLoading] = useState(true);
