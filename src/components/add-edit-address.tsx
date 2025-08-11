@@ -738,19 +738,21 @@ const styles = StyleSheet.create({
   saveButton: {
     flex: 1,
     height: 48,
-    backgroundColor: '#000',
+    borderWidth: 1,
+    borderColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: theme.colors.black,
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#000',
   },
   saveButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#fff',
+    color: theme.colors.white,
   },
   modalOverlay: {
     flex: 1,

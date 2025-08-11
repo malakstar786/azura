@@ -26,7 +26,9 @@ export default function Auth() {
     const { login, signup, isAuthenticated } = useAuthStore();
     const [isLogin, setIsLogin] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    // Keep errors scoped per form to ensure messages render under the correct fields
+    const [loginErrors, setLoginErrors] = useState<{ email?: string; password?: string }>({});
+    const [signupErrors, setSignupErrors] = useState<{ firstname?: string; lastname?: string; email?: string; telephone?: string; password?: string; form?: string }>({});
     const [showLoginPassword, setShowLoginPassword] = useState(false);
     const [showSignupPassword, setShowSignupPassword] = useState(false);
     
@@ -62,29 +64,25 @@ export default function Auth() {
 
     const handleLoginInputChange = (field: keyof typeof loginForm, value: string) => {
       setLoginForm(prev => ({ ...prev, [field]: value }));
-      if (errors[field]) {
-        setErrors(prev => ({ ...prev, [field]: '' }));
-      }
+      if (loginErrors[field]) setLoginErrors(prev => ({ ...prev, [field]: undefined }));
     };
 
     const handleSignupInputChange = (field: keyof typeof signupForm, value: string) => {
       setSignupForm(prev => ({ ...prev, [field]: value }));
-      if (errors[field]) {
-        setErrors(prev => ({ ...prev, [field]: '' }));
-      }
+      if (signupErrors[field as keyof typeof signupErrors]) setSignupErrors(prev => ({ ...prev, [field]: undefined }));
     };
 
     const handleLogin = async () => {
       if (!loginForm.email || !loginForm.password) {
-        setErrors({ 
-          email: t('auth.loginError'),
-          password: t('auth.loginError')
+        setLoginErrors({ 
+          email: !loginForm.email ? t('auth.loginError') : undefined,
+          password: !loginForm.password ? t('auth.loginError') : undefined,
         });
         return;
       }
       
       setIsLoading(true);
-      setErrors({});
+      setLoginErrors({});
       
       try {
         console.log('Login attempt with:', { email: loginForm.email });
@@ -93,10 +91,7 @@ export default function Auth() {
         // Router will handle redirection in the useEffect hook
       } catch (error: any) {
         const errorMessage = t('auth.loginError');
-        setErrors({ 
-          email: errorMessage, 
-          password: errorMessage  
-        });
+        setLoginErrors({ email: errorMessage, password: errorMessage });
         Alert.alert(t('common.error'), errorMessage);
       } finally {
         setIsLoading(false);
@@ -108,7 +103,7 @@ export default function Auth() {
       console.log('📋 AUTH.TSX: Current signup form data:', signupForm);
       
       // Validate all required fields
-      const validationErrors: Record<string, string> = {};
+      const validationErrors: { firstname?: string; lastname?: string; email?: string; telephone?: string; password?: string } = {};
       
       if (!signupForm.firstname?.trim()) {
         validationErrors.firstname = t('validation.firstNameRequired');
@@ -135,13 +130,13 @@ export default function Auth() {
       
       if (Object.keys(validationErrors).length > 0) {
         console.error('❌ AUTH.TSX: Validation failed:', validationErrors);
-        setErrors(validationErrors);
+        setSignupErrors(validationErrors);
         return;
       }
       
       console.log('✅ AUTH.TSX: Validation passed, starting signup process...');
       setIsLoading(true);
-      setErrors({});
+      setSignupErrors({});
       
       const userData = {
         firstname: signupForm.firstname.trim(),
@@ -164,7 +159,7 @@ export default function Auth() {
           name: error.name
         });
         
-        let errorMessage = error.message || t('auth.registrationError');
+        let errorMessage = error?.message || t('auth.registrationError');
         
         // Handle specific error cases
         if (errorMessage.includes('temporarily unavailable')) {
@@ -175,9 +170,13 @@ export default function Auth() {
         
         console.error('🔴 AUTH.TSX: Final error message shown to user:', errorMessage);
         
-        setErrors({ 
-          email: errorMessage
-        });
+        // If the message hints at an email conflict, show it under the email field.
+        if (/mail|email|exists/i.test(errorMessage)) {
+          setSignupErrors({ email: errorMessage });
+        } else {
+          // Otherwise show a top-level form error and keep field errors clean
+          setSignupErrors({ form: errorMessage });
+        }
         
         Alert.alert(t('common.error'), errorMessage);
       } finally {
@@ -208,7 +207,7 @@ export default function Auth() {
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
           />
-          {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+          {loginErrors.email ? <Text style={styles.errorText}>{loginErrors.email}</Text> : null}
         </View>
         
         <View style={styles.inputContainer}>
@@ -233,7 +232,7 @@ export default function Auth() {
               />
             </TouchableOpacity>
           </View>
-          {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+          {loginErrors.password ? <Text style={styles.errorText}>{loginErrors.password}</Text> : null}
         </View>
         
         <Link href="/forgot-password" asChild>
@@ -270,6 +269,12 @@ export default function Auth() {
         
         <View style={styles.divider} />
         
+        {signupErrors.form ? (
+          <Text style={[styles.errorText, { marginBottom: theme.spacing.sm }]}>
+            {signupErrors.form}
+          </Text>
+        ) : null}
+
         <Text style={styles.instructionText}>
           {t('signup.instruction')}
         </Text>
@@ -283,7 +288,7 @@ export default function Auth() {
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
           />
-          {errors.firstname && <Text style={styles.errorText}>{errors.firstname}</Text>}
+          {signupErrors.firstname ? <Text style={styles.errorText}>{signupErrors.firstname}</Text> : null}
         </View>
         <View style={styles.inputContainer}>
           <TextInput
@@ -294,7 +299,7 @@ export default function Auth() {
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
           />
-          {errors.lastname && <Text style={styles.errorText}>{errors.lastname}</Text>}
+          {signupErrors.lastname ? <Text style={styles.errorText}>{signupErrors.lastname}</Text> : null}
         </View>
         
         <View style={styles.inputContainer}>
@@ -308,7 +313,7 @@ export default function Auth() {
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
           />
-          {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+          {signupErrors.email ? <Text style={styles.errorText}>{signupErrors.email}</Text> : null}
         </View>
         
         <View style={styles.inputContainer}>
@@ -321,7 +326,7 @@ export default function Auth() {
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
           />
-          {errors.telephone && <Text style={styles.errorText}>{errors.telephone}</Text>}
+          {signupErrors.telephone ? <Text style={styles.errorText}>{signupErrors.telephone}</Text> : null}
         </View>
         
         <View style={styles.inputContainer}>
@@ -346,7 +351,7 @@ export default function Auth() {
               />
             </TouchableOpacity>
           </View>
-          {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+          {signupErrors.password ? <Text style={styles.errorText}>{signupErrors.password}</Text> : null}
         </View>
         
         <TouchableOpacity
@@ -374,25 +379,21 @@ export default function Auth() {
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={0}
         >
-          <Stack.Screen
-            options={{
-              title: '',
-              headerShadowVisible: false,
-              headerLeft: () => (
-                <TouchableOpacity onPress={() => router.back()}>
-                  <Ionicons name="arrow-back" size={24} color={theme.colors.black} style={{ transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] }} />
-                </TouchableOpacity>
-              ),
-            }}
-          />
-          
+          <Stack.Screen options={{ headerShown: false }} />
+
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            automaticallyAdjustKeyboardInsets
           >
+            <TouchableOpacity onPress={() => router.back()} style={{ paddingVertical: 8, paddingHorizontal: 4, alignSelf: 'flex-start' }}>
+              <Ionicons name="arrow-back" size={24} color={theme.colors.black} style={{ transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] }} />
+            </TouchableOpacity>
             {isLogin ? renderLoginForm() : renderSignupForm()}
           </ScrollView>
         </KeyboardAvoidingView>
@@ -410,12 +411,15 @@ const styles = StyleSheet.create({
     scrollContent: {
         flexGrow: 1,
         padding: theme.spacing.md,
+        paddingBottom: theme.spacing.xxl,
     },
     formContainer: {
         width: '100%',
         maxWidth: 500,
         alignSelf: 'center',
         paddingVertical: theme.spacing.md,
+        // Ensure it doesn't get overlapped by any header-like container
+        paddingTop: theme.spacing.md,
     },
     formTitle: {
         fontSize: theme.typography.sizes.xxxl,
@@ -433,6 +437,7 @@ const styles = StyleSheet.create({
         height: 2,
         backgroundColor: theme.colors.black,
         marginBottom: theme.spacing.lg,
+        marginTop: theme.spacing.sm,
     },
     instructionText: {
         fontSize: theme.typography.sizes.sm,

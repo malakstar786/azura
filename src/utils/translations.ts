@@ -167,7 +167,7 @@ export const translations = {
     'signup.mobile': 'MOBILE',
     'signup.password': 'PASSWORD',
     'signup.signUp': 'SIGN UP',
-    'signup.alreadyHaveAccount': 'ALREADY HAVE ACCOUNT LOGIN?',
+    'signup.alreadyHaveAccount': 'HAVE AN ACCOUNT? LOGIN HERE',
     'signup.success': 'Account created successfully!',
     'signup.failed': 'Sign up failed. Please try again.',
     

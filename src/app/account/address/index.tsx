@@ -131,13 +131,13 @@ export default function AddressScreen() {
     <View style={styles.container}>
       <Stack.Screen
         options={{
-          title: t('addresses.title'),
+          title: '',
+          headerShadowVisible: false,
           headerLeft: () => (
             <Pressable onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={24} color="black" />
+              <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={24} color={theme.colors.black} />
             </Pressable>
           ),
-          headerShadowVisible: false,
         }}
       />
 
@@ -146,10 +146,10 @@ export default function AddressScreen() {
           <ActivityIndicator size="large" color={theme.colors.black} />
         </View>
       ) : (
-        <ScrollView 
-          style={styles.content}
-          contentContainerStyle={styles.scrollContent}
-        >
+        <ScrollView style={styles.content}>
+          <Text style={styles.title}>{t('addresses.title')}</Text>
+          <View style={styles.divider} />
+
           {addresses.length === 0 ? (
             <View style={styles.emptyStateContainer}>
               <Text style={styles.emptyStateTitle}>{t('addresses.noAddresses')}</Text>
@@ -205,9 +205,19 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.md,
   },
-  scrollContent: {
-    padding: theme.spacing.lg,
+  title: {
+    fontSize: theme.typography.sizes.xxxl,
+    fontWeight: theme.typography.weights.bold as any,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
+  },
+  divider: {
+    height: 2,
+    backgroundColor: theme.colors.black,
+    marginBottom: theme.spacing.lg,
   },
   emptyStateContainer: {
     flex: 1,
@@ -236,7 +246,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: getFlexDirection('row'),
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.xxl,
   },
   addMoreButton: {
     marginTop: theme.spacing.md,

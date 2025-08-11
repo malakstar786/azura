@@ -149,7 +149,8 @@ export const makeApiCall = async <T = any>(
     const method = options.method || 'GET';
     
     // Prepare URL with query params if needed
-    let url = `${API_BASE_URL}${endpoint}`;
+    // Support absolute endpoints (e.g., currency change on a different host)
+    let url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
     // Append language=ar when Arabic is active
     url = appendLanguageParam(url);
     if (options.params && Object.keys(options.params).length > 0) {

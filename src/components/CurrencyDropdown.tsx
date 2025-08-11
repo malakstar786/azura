@@ -65,13 +65,14 @@ export default function CurrencyDropdown({ onCurrencyChange }: CurrencyDropdownP
 
   const handleCurrencySelect = async (currency: Currency) => {
     try {
-      // Call the change currency API
-      const formData = new FormData();
-      formData.append('code', currency.code);
-      
+      // changeCurrency endpoint requires application/x-www-form-urlencoded and is absolute
+      const body = new URLSearchParams();
+      body.append('code', currency.code);
+
       await makeApiCall(API_ENDPOINTS.changeCurrency, {
         method: 'POST',
-        data: formData
+        data: body.toString(),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
 
       setSelectedCurrency(currency);
