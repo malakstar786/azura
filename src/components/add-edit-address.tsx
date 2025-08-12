@@ -496,6 +496,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
             </Text>
             <Ionicons name="chevron-down" size={20} color="#000" />
           </TouchableOpacity>
+          <Text style={styles.helperNote}>{t('address.changeCountryNote')}</Text>
 
           {/* City/Governorate Dropdown */}
           <TouchableOpacity 
@@ -723,6 +724,12 @@ const styles = StyleSheet.create({
   placeholderText: {
     fontSize: 16,
     color: '#999',
+  },
+  helperNote: {
+    fontSize: 12,
+    color: theme.colors.mediumGray,
+    marginBottom: 12,
+    textAlign: getTextAlign(),
   },
   footer: {
     flexDirection: getFlexDirection('row'),

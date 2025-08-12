@@ -1,6 +1,7 @@
 import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@store/auth-store';
 import { useCartStore } from '@store/cart-store';
 import { useLanguageStore } from '@store/language-store';
@@ -325,7 +326,20 @@ export default function CartScreen() {
         t('cart.loginRequiredMessage'),
         [
           { text: t('common.cancel'), style: 'cancel' },
-          { text: t('auth.signIn'), onPress: () => router.push('/auth') },
+          { 
+            text: t('auth.signIn'), 
+            onPress: async () => {
+              try {
+                // Persist pending guest cart (product_id + quantity only)
+                const pending = items.map((it) => ({
+                  product_id: it.product_id,
+                  quantity: typeof it.quantity === 'string' ? parseInt(it.quantity, 10) : (it.quantity || 1),
+                }));
+                await AsyncStorage.setItem('@azura.pending_cart', JSON.stringify(pending));
+              } catch {}
+              router.push('/auth?redirect=checkout');
+            }
+          },
         ]
       );
       return;

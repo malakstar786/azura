@@ -1,6 +1,8 @@
 import { useTranslation } from '@/i18n/useTranslation';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@store/auth-store';
+import { useCartStore } from '@store/cart-store';
 import { theme } from '@theme';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import { Link, Stack, router, useLocalSearchParams } from 'expo-router';
@@ -24,6 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function Auth() {
     const { t } = useTranslation();
     const { login, signup, isAuthenticated } = useAuthStore();
+    const { addToCart, getCart } = useCartStore();
     const [isLogin, setIsLogin] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     // Keep errors scoped per form to ensure messages render under the correct fields
@@ -36,16 +39,36 @@ export default function Auth() {
 
     // Redirect if already authenticated
     useEffect(() => {
-      if (isAuthenticated) {
+      const completePostAuthFlow = async () => {
+        if (!isAuthenticated) return;
+        try {
+          // Merge any pending guest cart into user cart
+          const pending = await AsyncStorage.getItem('@azura.pending_cart');
+          if (pending) {
+            const items: Array<{ product_id: string; quantity: number }> = JSON.parse(pending);
+            for (const it of items) {
+              const qty = Math.max(1, Math.floor(Number(it.quantity) || 1));
+              await addToCart(it.product_id, qty);
+            }
+            await AsyncStorage.removeItem('@azura.pending_cart');
+            await getCart();
+          }
+        } catch {}
+
         if (redirect === 'checkout') {
           router.replace('/checkout');
         } else if (redirect === 'cart') {
-          router.replace('/(shop)/cart');
+          // If the user arrived here via a cart/checkout intent, prefer checkout after signup too
+          router.replace('/checkout');
         } else {
-          router.replace('/');
+          // If we merged a pending cart, prefer checkout
+          const hadPending = await AsyncStorage.getItem('@azura.pending_cart');
+          if (hadPending) router.replace('/checkout');
+          else router.replace('/');
         }
-      }
-    }, [isAuthenticated, redirect]);
+      };
+      completePostAuthFlow();
+    }, [isAuthenticated, redirect, addToCart, getCart]);
 
     // Login form state
     const [loginForm, setLoginForm] = useState({

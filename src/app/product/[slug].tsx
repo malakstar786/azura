@@ -140,22 +140,26 @@ const ProductDetails = () => {
   const handleBuyNow = async () => {
     if (!product) return;
     
-    // First add product to cart (locally or server-side depending on auth status)
-    handleAddToCart();
-    
     // Check if user is authenticated and validate session
     if (!isAuthenticated) {
-      // If not authenticated, redirect to login screen with cart redirect parameter
-      // The auth screen will handle redirecting to cart after successful login
-      router.push('/auth?redirect=cart');
+      // Persist a pending checkout item for post-auth merge and go to auth
+      try {
+        const pending = [{ product_id: product.product_id, quantity }];
+        const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+        await AsyncStorage.setItem('@azura.pending_cart', JSON.stringify(pending));
+      } catch {}
+      router.push('/auth?redirect=checkout');
       return;
     }
+
+    // First add product to cart when authenticated
+    handleAddToCart();
     
     // If user appears authenticated, validate the session with server
     const isSessionValid = await validateSession();
     if (!isSessionValid) {
-      // Session is invalid, redirect to login
-      router.push('/auth?redirect=cart');
+      // Session is invalid, redirect to auth for checkout
+      router.push('/auth?redirect=checkout');
       return;
     }
     
