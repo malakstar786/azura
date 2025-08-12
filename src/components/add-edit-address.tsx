@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAddressStore } from '@store/address-store';
 import { useAuthStore } from '@store/auth-store';
 import { theme } from '@theme';
+import { getActiveCountryId } from '@utils/api-config';
 import { Country, Governorate, LocationService, Zone } from '@utils/location-service';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import React, { useEffect, useState } from 'react';
@@ -80,7 +81,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
     address_2: address?.address_2 || '',
     city: address?.city || '',
     postcode: address?.postcode || '',
-    country_id: address?.country_id || '114', // Kuwait
+    country_id: address?.country_id || '',
     zone_id: address?.zone_id || '',
     custom_field: {
       '30': address?.custom_field?.['30'] || '',
@@ -143,7 +144,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
         address_2: address.address_2 || '',
         city: address.city || '',
         postcode: address.postcode || '',
-        country_id: address.country_id || '114',
+        country_id: address.country_id || formData.country_id || '',
         zone_id: address.zone_id || '',
         custom_field: address.custom_field || {
           '30': '',
@@ -183,11 +184,11 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
       const uniqueCountries = uniqueBy<Country, string>(countriesData, (c) => c.country_id);
       setCountries(uniqueCountries);
       
-      // Set Kuwait as default if available
-      const kuwait = uniqueCountries.find((c: Country) => c.country_id === '114');
-      if (kuwait) {
-        setSelectedCountry(kuwait);
-      }
+      // Set selected country based on active stored country id
+      const activeCountryId = await getActiveCountryId();
+      const active = uniqueCountries.find((c: Country) => c.country_id === activeCountryId) || null;
+      setSelectedCountry(active);
+      if (active) setFormData((prev) => ({ ...prev, country_id: active.country_id }));
     } catch (error) {
       console.error('Error loading countries:', error);
       Alert.alert(t('common.error'), t('error.serverError'));
@@ -355,7 +356,9 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
           apartmentNumber: updatedFormData.custom_field['33'] || '',
           avenue: updatedFormData.custom_field['35'] || '',
           additionalDetails: updatedFormData.address_2 || '',
-          isDefault: updatedFormData.default
+          isDefault: updatedFormData.default,
+          country_id: updatedFormData.country_id,
+          zone_id: updatedFormData.zone_id
         };
 
         if (updatedFormData.address_id) {

@@ -77,8 +77,8 @@ export default function AddressScreen() {
       address_2: address.additionalDetails,
       company: '',
       postcode: '',
-      country_id: '114', // Kuwait
-      zone_id: '1785',   // Kuwait City
+      country_id: '',
+      zone_id: '',
       custom_field: {
         '30': address.block, // Block
         '31': address.street, // Street

@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Address, useAuthStore } from '@store/auth-store';
 import { useCartStore } from '@store/cart-store';
 import { theme } from '@theme';
-import { API_BASE_URL, API_ENDPOINTS, makeApiCall } from '@utils/api-config';
+import { API_BASE_URL, API_ENDPOINTS, getActiveCountryId, makeApiCall } from '@utils/api-config';
 import { getFlexDirection } from '@utils/rtlStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -205,7 +205,7 @@ export default function CheckoutScreen() {
           paymentMethod: paymentMethodObject
         },
         amount: totalAmount.toString(),
-        currencyCode: '414', // KWD currency code
+        currencyCode: '414', // Backend expects numeric code for KWD; currency switching not specified for Apple Pay
         trackId: trackId, 
         trackid: trackId, 
         order_id: orderId
@@ -455,7 +455,7 @@ export default function CheckoutScreen() {
           lastname: selectedAddress.lastname,
           email: user?.email || '', // Use user's email from auth store
           telephone: selectedAddress.telephone || user?.telephone || '',
-          country_id: "114", // Kuwait
+          country_id: await getActiveCountryId(),
           city: selectedAddress.city,
           zone_id: selectedAddress.zone_id,
           address_2: selectedAddress.address_2 || "",
@@ -487,7 +487,7 @@ export default function CheckoutScreen() {
           lastname: localAddress.lastname,
           email: localAddress.email || '', // Use email from local address data
           telephone: localAddress.telephone || '',
-          country_id: "114", // Kuwait
+          country_id: await getActiveCountryId(),
           city: localAddress.city,
           zone_id: localAddress.zone_id,
           address_2: localAddress.address_2 || "",
@@ -889,7 +889,7 @@ export default function CheckoutScreen() {
           lastname: addressData.lastname,
           email: addressData.email || user?.email || '',
           telephone: addressData.telephone || addressData.phone || user?.telephone || '',
-          country_id: "114", // Kuwait
+         country_id: await getActiveCountryId(),
           city: addressData.city,
           zone_id: addressData.zone_id,
           address_2: addressData.address_2 || "",
@@ -973,7 +973,7 @@ export default function CheckoutScreen() {
         lastname: addressData.lastname,
         email: addressData.email || user?.email || '',
         telephone: addressData.telephone || addressData.phone || user?.telephone || '',
-        country_id: "114", // Kuwait
+       country_id: await getActiveCountryId(),
         city: addressData.city || "1",
         zone_id: addressData.zone_id || "4868",
         address_2: addressData.address_2 || "",

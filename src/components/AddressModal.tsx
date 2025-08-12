@@ -1,5 +1,6 @@
 import type { Address } from '@store/address-store';
-import React from 'react';
+import { getActiveCountryId } from '@utils/api-config';
+import React, { useEffect, useState } from 'react';
 import { Modal, StyleSheet, View } from 'react-native';
 import AddEditAddress from './add-edit-address';
 
@@ -11,6 +12,15 @@ interface AddressModalProps {
 }
 
 export default function AddressModal({ visible, onClose, isNewAddress, address }: AddressModalProps) {
+  const [activeCountryId, setActiveCountryIdState] = useState<string>('');
+
+  useEffect(() => {
+    (async () => {
+      const id = await getActiveCountryId();
+      setActiveCountryIdState(id);
+    })();
+  }, []);
+
   // Convert Address to FormData format
   const formData = address ? {
     firstname: address.firstName,
@@ -21,8 +31,8 @@ export default function AddressModal({ visible, onClose, isNewAddress, address }
     address_2: address.additionalDetails,
     city: address.city,
     postcode: '',
-    country_id: '114', // Kuwait
-    zone_id: '1785', // Al Asimah (Kuwait City)
+    country_id: activeCountryId,
+    zone_id: '',
     custom_field: {
       '30': address.block,
       '31': address.street,

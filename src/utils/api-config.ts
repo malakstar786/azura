@@ -6,6 +6,10 @@ import * as Crypto from 'expo-crypto';
 // Core API configuration
 export const API_BASE_URL = 'https://azura.com.kw';
 
+// Persisted keys
+const ACTIVE_COUNTRY_STORAGE_KEY = '@azura.active_country_id';
+const ACTIVE_CURRENCY_CODE_KEY = '@azura.active_currency_code';
+
 // API Endpoints
 export const API_ENDPOINTS = {
   login: '/index.php?route=extension/mstore/account|login',
@@ -592,6 +596,38 @@ export const addToCart = async (productId: string, quantity: number): Promise<Ap
     };
   }
 };
+
+// Country/Currency helpers
+// Kept here to avoid new files; used by address flows and location service
+
+export async function setActiveCountryId(countryId: string): Promise<void> {
+  try {
+    await AsyncStorage.setItem(ACTIVE_COUNTRY_STORAGE_KEY, countryId);
+  } catch {}
+}
+
+export async function getActiveCountryId(): Promise<string> {
+  try {
+    const stored = await AsyncStorage.getItem(ACTIVE_COUNTRY_STORAGE_KEY);
+    if (stored && stored.trim().length > 0) return stored;
+  } catch {}
+  // Fallback to Kuwait if nothing is stored (legacy behavior)
+  return '114';
+}
+
+export async function setActiveCurrencyCode(code: string): Promise<void> {
+  try {
+    await AsyncStorage.setItem(ACTIVE_CURRENCY_CODE_KEY, code);
+  } catch {}
+}
+
+export async function getActiveCurrencyCode(): Promise<string | null> {
+  try {
+    return (await AsyncStorage.getItem(ACTIVE_CURRENCY_CODE_KEY)) || null;
+  } catch {
+    return null;
+  }
+}
 
 export const updateCartQuantity = async (cartId: string, quantity: number): Promise<ApiResponse<any>> => {
   try {

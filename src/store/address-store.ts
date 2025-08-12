@@ -34,7 +34,10 @@ export const convertToApiAddress = (address: Address | Omit<Address, 'id'>, addr
   formData.append('firstname', address.firstName);
   formData.append('lastname', address.lastName);
   formData.append('telephone', address.phone);
-  formData.append('country_id', '114'); // Kuwait
+  // Use dynamic country on the caller side; keep empty here so callers must specify
+  // For backward compatibility, leave empty and let server validate when not provided
+  // Prefer using improved add-edit-address to set country_id
+  // formData.append('country_id', await getActiveCountryId()); // not async in this util
   formData.append('zone_id', ''); // Not used but required
   formData.append('city', address.city);
   
@@ -86,8 +89,8 @@ interface AddressStore {
   isLoading: boolean;
   error: string | null;
   fetchAddresses: () => Promise<void>;
-  addAddress: (address: Omit<Address, 'id'>) => Promise<void>;
-  updateAddress: (id: string, address: Omit<Address, 'id'>) => Promise<void>;
+  addAddress: (address: Omit<Address, 'id'> & { country_id?: string; zone_id?: string }) => Promise<void>;
+  updateAddress: (id: string, address: Omit<Address, 'id'> & { country_id?: string; zone_id?: string }) => Promise<void>;
   deleteAddress: (id: string) => Promise<void>;
   setSelectedAddress: (id: string) => void;
 }
@@ -164,7 +167,7 @@ export const useAddressStore = create<AddressStore>()(
         }
       },
       
-      addAddress: async (address: Omit<Address, 'id'>) => {
+      addAddress: async (address: Omit<Address, 'id'> & { country_id?: string; zone_id?: string }) => {
         try {
           set({ isLoading: true, error: null });
 
@@ -176,9 +179,9 @@ export const useAddressStore = create<AddressStore>()(
           formData.append('lastname', address.lastName);
           formData.append('telephone', address.phone);
           formData.append('company', ''); // Required empty field
-          formData.append('country_id', '114'); // Kuwait
-          formData.append('zone_id', '1785'); // Al Asimah (Kuwait City)
-          formData.append('city', address.city || 'Kuwait City');
+          if (address.country_id) formData.append('country_id', address.country_id);
+          if (address.zone_id) formData.append('zone_id', address.zone_id);
+          if (address.city) formData.append('city', address.city);
           formData.append('postcode', ''); // Required empty field
           
           // Format address_1 with block, street, and house number
@@ -202,7 +205,7 @@ export const useAddressStore = create<AddressStore>()(
             firstname: address.firstName,
             lastname: address.lastName,
             city: address.city || 'Kuwait City',
-            zone_id: '1785',
+            // zone_id removed from logs to avoid implying defaults
             address_1: address1,
             custom_fields: {
               30: address.block,
@@ -245,7 +248,7 @@ export const useAddressStore = create<AddressStore>()(
         }
       },
       
-      updateAddress: async (id: string, address: Omit<Address, 'id'>) => {
+      updateAddress: async (id: string, address: Omit<Address, 'id'> & { country_id?: string; zone_id?: string }) => {
         try {
           set({ isLoading: true, error: null });
 
@@ -261,9 +264,9 @@ export const useAddressStore = create<AddressStore>()(
           formData.append('lastname', address.lastName);
           formData.append('telephone', address.phone);
           formData.append('company', ''); // Required empty field
-          formData.append('country_id', '114'); // Kuwait
-          formData.append('zone_id', '1785'); // Al Asimah (Kuwait City)
-          formData.append('city', address.city || 'Kuwait City');
+          if (address.country_id) formData.append('country_id', address.country_id);
+          if (address.zone_id) formData.append('zone_id', address.zone_id);
+          if (address.city) formData.append('city', address.city);
           formData.append('postcode', ''); // Required empty field
           
           // Format address_1 with block, street, and house number
@@ -287,7 +290,7 @@ export const useAddressStore = create<AddressStore>()(
             firstname: address.firstName,
             lastname: address.lastName,
             city: address.city || 'Kuwait City',
-            zone_id: '1785',
+            // zone_id removed from logs to avoid implying defaults
             address_1: address1,
             custom_fields: {
               30: address.block,

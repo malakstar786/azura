@@ -1,4 +1,4 @@
-import { API_ENDPOINTS, makeApiCall } from '@utils/api-config';
+import { API_ENDPOINTS, getActiveCountryId, makeApiCall } from '@utils/api-config';
 
 export interface Country {
   country_id: string;
@@ -59,11 +59,10 @@ export class LocationService {
     }
   }
 
-  static async getGovernoratesAndAreas(countryId: string = '114', governorateId?: string): Promise<LocationResponse> {
+  static async getGovernoratesAndAreas(countryId?: string, governorateId?: string): Promise<LocationResponse> {
     try {
-      const params: Record<string, string> = {
-        country_id: countryId
-      };
+      const activeCountryId = countryId || await getActiveCountryId();
+      const params: Record<string, string> = { country_id: activeCountryId };
       
       if (governorateId) {
         params.governorate_id = governorateId;
@@ -86,7 +85,7 @@ export class LocationService {
     }
   }
 
-  static async getAreasByGovernorate(countryId: string = '114', governorateId: string): Promise<Zone[]> {
+  static async getAreasByGovernorate(countryId: string | undefined, governorateId: string): Promise<Zone[]> {
     try {
       const locationData = await this.getGovernoratesAndAreas(countryId, governorateId);
       return locationData.zone || [];

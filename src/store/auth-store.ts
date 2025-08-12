@@ -366,8 +366,9 @@ export const useAuthStore = create<AuthState>()(
           formData.append('address_2', address.address_2 || '');
           formData.append('city', address.city);
           formData.append('postcode', address.postcode || '');
-          formData.append('country_id', address.country_id || '114'); // Kuwait default
-          formData.append('zone_id', address.zone_id || '1785');  // Kuwait City default
+          // Require explicit country and zone from UI; do not fallback to Kuwait
+          if (address.country_id) formData.append('country_id', address.country_id);
+          if (address.zone_id) formData.append('zone_id', address.zone_id);
           
           // Add custom fields
           if (address.custom_field) {

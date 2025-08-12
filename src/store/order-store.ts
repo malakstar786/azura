@@ -63,7 +63,7 @@ export const useOrderStore = create<OrderStore>((set) => ({
         const enhancedOrders = response.data.map((order: Order) => ({
           ...order,
           status: order.status || 'Processing',
-          currency_code: order.currency_code || 'KWD',
+          currency_code: order.currency_code,
           currency_value: order.currency_value || '1.000',
         }));
 
