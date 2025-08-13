@@ -106,7 +106,7 @@ function RootLayout() {
     <ToastProvider>
       <SafeAreaProvider>
         <ErrorBoundary>
-          <View style={{ flex: 1, direction: isRTL ? 'rtl' : 'ltr' }} key={`${isRTL}-${currentLanguage}` as any}>
+          <View style={{ flex: 1 }} key={`${isRTL}-${currentLanguage}` as any}>
           <Stack
           screenOptions={{
             headerStyle: {

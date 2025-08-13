@@ -113,7 +113,6 @@ const styles = StyleSheet.create({
   },
   selectionContainer: {
     width: '100%',
-    marginStart: -20,
     paddingHorizontal: theme.spacing.lg,
     marginTop: 'auto',
     marginBottom: 75,

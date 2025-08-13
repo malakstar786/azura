@@ -464,8 +464,9 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
         >
           <ScrollView 
             style={styles.formContainer} 
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={true}
             contentContainerStyle={styles.scrollViewContent}
+            keyboardShouldPersistTaps="handled"
           >
           {/* Full Name Field */}
           <TextInput
@@ -523,7 +524,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
           </TouchableOpacity>
 
           {/* Block and Street Row */}
-          <View style={styles.rowInputs}>
+          <View style={[styles.rowInputs, I18nManager.isRTL ? { flexDirection: 'row-reverse' } : null]}>
             <TextInput
               style={[styles.input, styles.halfInput]}
               placeholder={t('address.block')}
@@ -548,7 +549,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
           </View>
 
           {/* House Building and Apartment Row */}
-          <View style={styles.rowInputs}>
+          <View style={[styles.rowInputs, I18nManager.isRTL ? { flexDirection: 'row-reverse' } : null]}>
             <TextInput
               style={[styles.input, styles.halfInput]}
               placeholder={t('address.building')}
@@ -684,7 +685,8 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   scrollViewContent: {
-    paddingBottom: 100,
+    paddingBottom: 200,
+    paddingHorizontal: 16,
   },
   input: {
     height: 56,
@@ -720,10 +722,12 @@ const styles = StyleSheet.create({
   inputText: {
     fontSize: 16,
     color: '#000',
+    textAlign: getTextAlign(),
   },
   placeholderText: {
     fontSize: 16,
     color: '#999',
+    textAlign: getTextAlign(),
   },
   helperNote: {
     fontSize: 12,

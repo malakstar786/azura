@@ -5,12 +5,12 @@ import { getFlexDirection } from '@utils/rtlStyles';
 import { Stack, router } from 'expo-router';
 import React from 'react';
 import {
-  Linking,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Linking,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -45,7 +45,7 @@ export default function PoliciesScreen() {
         }}
       />
 
-      <ScrollView style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>{t('policies.title')}</Text>
         <View style={styles.divider} />
 

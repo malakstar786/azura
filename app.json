@@ -4,7 +4,7 @@
     "slug": "azura-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/assets/main_icon.jpg",
+    "icon": "./src/assets/azuraappicon.png",
     "scheme": "azuraapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

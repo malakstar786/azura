@@ -8,16 +8,16 @@ import { API_ENDPOINTS, makeApiCall } from '@utils/api-config';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  AppState,
-  Linking,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    AppState,
+    Linking,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 export default function MyDetailsScreen() {
@@ -156,7 +156,7 @@ export default function MyDetailsScreen() {
         }} 
       />
       
-      <ScrollView style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>{t('details.title')}</Text>
         <View style={styles.divider} />
         
