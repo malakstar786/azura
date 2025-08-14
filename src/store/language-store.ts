@@ -61,14 +61,35 @@ export const useLanguageStore = create<LanguageState>()(
       setLanguage: async (language: Language) => {
         console.log(`Setting language to: ${language}`);
         const isNewRTL = language === 'ar';
-        let needsRestart = false;
+        const directionChangeNeeded = I18nManager.isRTL !== isNewRTL;
 
-        // Check if direction needs to be flipped
-        if (I18nManager.isRTL !== isNewRTL) {
+        // 1) Apply locale and persist BEFORE any potential reload so the choice survives reload
+        setI18nLanguage(language);
+
+        // Update theme RTL properties for immediate UI consistency
+        theme.rtl.isRTL = isNewRTL;
+        theme.rtl.textAlign = isNewRTL ? 'right' : 'left';
+        theme.rtl.flexDirection = isNewRTL ? 'row-reverse' : 'row';
+
+        // Persist language for next app start
+        try {
+          await AsyncStorage.setItem('appLanguage', language);
+        } catch (error) {
+          console.error('Failed to save language to AsyncStorage', error);
+        }
+
+        // Update store state so subscribers re-render immediately
+        set({
+          currentLanguage: language,
+          isRTL: isNewRTL,
+          restartRequired: directionChangeNeeded,
+          lastUpdated: Date.now(),
+        });
+
+        // 2) If direction changed, update I18nManager and trigger reload last
+        if (directionChangeNeeded) {
           I18nManager.allowRTL(true);
           I18nManager.forceRTL(isNewRTL);
-          needsRestart = true;
-          // Attempt to reload the app so native direction applies globally
           if (Platform.OS !== 'web') {
             try {
               if (__DEV__) {
@@ -88,28 +109,6 @@ export const useLanguageStore = create<LanguageState>()(
             }
           }
         }
-        
-        // Update i18n locale
-        setI18nLanguage(language);
-
-        // Update theme RTL properties
-        theme.rtl.isRTL = isNewRTL;
-        theme.rtl.textAlign = isNewRTL ? 'right' : 'left';
-        theme.rtl.flexDirection = isNewRTL ? 'row-reverse' : 'row';
-        
-        // Store language directly in AsyncStorage for immediate persistence
-        try {
-          await AsyncStorage.setItem('appLanguage', language);
-        } catch (error) {
-          console.error('Failed to save language to AsyncStorage', error);
-        }
-        
-        set({ 
-          currentLanguage: language,
-          isRTL: isNewRTL,
-          restartRequired: needsRestart,
-          lastUpdated: Date.now() // Update timestamp to force subscribers to re-render
-        });
       },
       
       // Update first-time user flag
