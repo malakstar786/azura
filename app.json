@@ -2,7 +2,7 @@
   "expo": {
     "name": "Azura App",
     "slug": "azura-app",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./src/assets/azuraappIcon.png",
     "scheme": "azuraapp",
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/azuraappIcon.png",
+        "foregroundImage": "./src/assets/playstore-icon.png",
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
@@ -33,12 +33,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./src/assets/icon.png",
+          "image": "./src/assets/azuraappIcon.png",
           "imageWidth": 300,
           "resizeMode": "native",
           "backgroundColor": "#000000",
           "dark": {
-            "image": "./src/assets/icon.png",
+            "image": "./src/assets/azuraappIcon.png",
             "imageWidth": 300,
             "resizeMode": "native",
             "backgroundColor": "#000000"
