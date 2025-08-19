@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/playstore-icon.png",
+        "foregroundImage": "./src/assets/azuraappIcon.png",
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
@@ -34,13 +34,13 @@
         "expo-splash-screen",
         {
           "image": "./src/assets/azuraappIcon.png",
-          "imageWidth": 300,
-          "resizeMode": "native",
+          "imageWidth": 240,
+          "resizeMode": "contain",
           "backgroundColor": "#000000",
           "dark": {
             "image": "./src/assets/azuraappIcon.png",
-            "imageWidth": 300,
-            "resizeMode": "native",
+            "imageWidth": 240,
+            "resizeMode": "contain",
             "backgroundColor": "#000000"
           }
         }
