@@ -94,12 +94,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
     address_id: address?.address_id
   });
 
-  // Separate state for full name to allow free typing with spaces
-  const [fullName, setFullName] = useState(() => {
-    const first = address?.firstname || '';
-    const last = address?.lastname || '';
-    return first + (last ? ' ' + last : '');
-  });
+  // First and last name are now collected separately (consistent with signup)
 
   // Location data state
   const [countries, setCountries] = useState<Country[]>([]);
@@ -249,10 +244,12 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
   };
 
   const validateForm = () => {
-    const nameParts = fullName.trim().split(' ').filter(part => part.length > 0);
-    
-    if (nameParts.length < 2) {
-      Alert.alert(t('common.error'), t('validation.fullNameRequired'));
+    if (!formData.firstname.trim()) {
+      Alert.alert(t('common.error'), t('validation.firstNameRequired'));
+      return false;
+    }
+    if (!formData.lastname.trim()) {
+      Alert.alert(t('common.error'), t('validation.lastNameRequired'));
       return false;
     }
     if (!formData.phone.trim()) {
@@ -288,27 +285,6 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
   };
 
   const handleSubmit = async () => {
-    // Split full name before validation and submission
-    const splitName = () => {
-      const trimmedName = fullName.trim();
-      if (trimmedName === '') {
-        return { firstname: '', lastname: '' };
-      }
-      
-      const lastSpaceIndex = trimmedName.lastIndexOf(' ');
-      if (lastSpaceIndex === -1) {
-        return { firstname: trimmedName, lastname: '' };
-      }
-      
-      return {
-        firstname: trimmedName.substring(0, lastSpaceIndex),
-        lastname: trimmedName.substring(lastSpaceIndex + 1)
-      };
-    };
-
-    const { firstname, lastname } = splitName();
-    const updatedFormData = { ...formData, firstname, lastname };
-
     if (!validateForm()) return;
 
     try {
@@ -319,20 +295,20 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
         
         // For new addresses in checkout context, use custom payment address endpoint
         const addressData = {
-          firstname: updatedFormData.firstname,
-          lastname: updatedFormData.lastname || '',
-          telephone: updatedFormData.phone || user?.telephone || '',
+          firstname: formData.firstname,
+          lastname: formData.lastname || '',
+          telephone: formData.phone || user?.telephone || '',
           email: user?.email || '', // Use user's email from auth store
-          country_id: updatedFormData.country_id,
-          city: updatedFormData.city,
-          zone_id: updatedFormData.zone_id,
-          address_2: updatedFormData.address_2 || '',
+          country_id: formData.country_id,
+          city: formData.city,
+          zone_id: formData.zone_id,
+          address_2: formData.address_2 || '',
           custom_field: {
-            '30': updatedFormData.custom_field['30'], // Block
-            '31': updatedFormData.custom_field['31'], // Street
-            '32': updatedFormData.custom_field['32'], // House Building
-            '33': updatedFormData.custom_field['33'], // Apartment No.
-            '35': updatedFormData.custom_field['35'] || '' // avenue
+            '30': formData.custom_field['30'], // Block
+            '31': formData.custom_field['31'], // Street
+            '32': formData.custom_field['32'], // House Building
+            '33': formData.custom_field['33'], // Apartment No.
+            '35': formData.custom_field['35'] || '' // avenue
           }
         };
 
@@ -346,23 +322,23 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
       } else {
         // For account context or editing existing addresses, use existing address store logic
         const addressData = {
-          firstName: updatedFormData.firstname,
-          lastName: updatedFormData.lastname || '',
-          phone: updatedFormData.phone,
-          city: updatedFormData.city,
-          block: updatedFormData.custom_field['30'],
-          street: updatedFormData.custom_field['31'],
-          houseNumber: updatedFormData.custom_field['32'],
-          apartmentNumber: updatedFormData.custom_field['33'] || '',
-          avenue: updatedFormData.custom_field['35'] || '',
-          additionalDetails: updatedFormData.address_2 || '',
-          isDefault: updatedFormData.default,
-          country_id: updatedFormData.country_id,
-          zone_id: updatedFormData.zone_id
+          firstName: formData.firstname,
+          lastName: formData.lastname || '',
+          phone: formData.phone,
+          city: formData.city,
+          block: formData.custom_field['30'],
+          street: formData.custom_field['31'],
+          houseNumber: formData.custom_field['32'],
+          apartmentNumber: formData.custom_field['33'] || '',
+          avenue: formData.custom_field['35'] || '',
+          additionalDetails: formData.address_2 || '',
+          isDefault: formData.default,
+          country_id: formData.country_id,
+          zone_id: formData.zone_id
         };
 
-        if (updatedFormData.address_id) {
-          await updateAddress(updatedFormData.address_id, addressData);
+        if (formData.address_id) {
+          await updateAddress(formData.address_id, addressData);
         } else {
           await addAddress(addressData);
         }
@@ -468,14 +444,23 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
             contentContainerStyle={styles.scrollViewContent}
             keyboardShouldPersistTaps="handled"
           >
-          {/* Full Name Field */}
-          <TextInput
-            style={styles.input}
-            placeholder={t('signup.fullName')}
-            value={fullName}
-            onChangeText={setFullName}
-            placeholderTextColor="#999"
-          />
+          {/* First & Last Name Fields */}
+          <View style={[styles.rowInputs, I18nManager.isRTL ? { flexDirection: 'row-reverse' } : null]}>
+            <TextInput
+              style={[styles.input, styles.halfInput]}
+              placeholder={t('auth.firstName')}
+              value={formData.firstname}
+              onChangeText={(text) => setFormData({ ...formData, firstname: text })}
+              placeholderTextColor="#999"
+            />
+            <TextInput
+              style={[styles.input, styles.halfInput]}
+              placeholder={t('auth.lastName')}
+              value={formData.lastname}
+              onChangeText={(text) => setFormData({ ...formData, lastname: text })}
+              placeholderTextColor="#999"
+            />
+          </View>
 
           {/* Phone Field */}
           <TextInput
@@ -576,7 +561,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
           {/* Avenue Field */}
           <TextInput
             style={styles.input}
-            placeholder={t('address.additionalInfo')}
+            placeholder={t('address.avenue')}
             value={formData.custom_field['35']}
             onChangeText={(text) => setFormData({
               ...formData,
@@ -592,7 +577,6 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
             value={formData.address_2}
             onChangeText={(text) => setFormData({ ...formData, address_2: text })}
             placeholderTextColor="#999"
-            multiline
           />
 
           {/* Footer Buttons */}
@@ -695,7 +679,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     paddingHorizontal: 16,
     marginBottom: 16,
-    fontSize: 16,
+    fontSize: 13,
     color: '#000',
     backgroundColor: '#fff',
     textAlign: getTextAlign(),

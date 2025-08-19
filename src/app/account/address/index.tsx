@@ -146,7 +146,7 @@ export default function AddressScreen() {
           <ActivityIndicator size="large" color={theme.colors.black} />
         </View>
       ) : (
-        <ScrollView style={styles.content}>
+        <ScrollView contentContainerStyle={styles.content}>
           <Text style={styles.title}>{t('addresses.title')}</Text>
           <View style={styles.divider} />
 
