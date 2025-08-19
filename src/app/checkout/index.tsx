@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Address, useAuthStore } from '@store/auth-store';
 import { useCartStore } from '@store/cart-store';
 import { theme } from '@theme';
-import { API_BASE_URL, API_ENDPOINTS, getActiveCountryId, makeApiCall } from '@utils/api-config';
+import { API_BASE_URL, API_ENDPOINTS, makeApiCall } from '@utils/api-config';
 import { getFlexDirection } from '@utils/rtlStyles';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -455,7 +455,7 @@ export default function CheckoutScreen() {
           lastname: selectedAddress.lastname,
           email: user?.email || '', // Use user's email from auth store
           telephone: selectedAddress.telephone || user?.telephone || '',
-          country_id: await getActiveCountryId(),
+          country_id: selectedAddress.country_id,
           city: selectedAddress.city,
           zone_id: selectedAddress.zone_id,
           address_2: selectedAddress.address_2 || "",
@@ -487,7 +487,7 @@ export default function CheckoutScreen() {
           lastname: localAddress.lastname,
           email: localAddress.email || '', // Use email from local address data
           telephone: localAddress.telephone || '',
-          country_id: await getActiveCountryId(),
+          country_id: localAddress.country_id,
           city: localAddress.city,
           zone_id: localAddress.zone_id,
           address_2: localAddress.address_2 || "",
@@ -889,7 +889,7 @@ export default function CheckoutScreen() {
           lastname: addressData.lastname,
           email: addressData.email || user?.email || '',
           telephone: addressData.telephone || addressData.phone || user?.telephone || '',
-         country_id: await getActiveCountryId(),
+          country_id: addressData.country_id,
           city: addressData.city,
           zone_id: addressData.zone_id,
           address_2: addressData.address_2 || "",
@@ -973,9 +973,9 @@ export default function CheckoutScreen() {
         lastname: addressData.lastname,
         email: addressData.email || user?.email || '',
         telephone: addressData.telephone || addressData.phone || user?.telephone || '',
-       country_id: await getActiveCountryId(),
-        city: addressData.city || "1",
-        zone_id: addressData.zone_id || "4868",
+        country_id: addressData.country_id,
+        city: addressData.city,
+        zone_id: addressData.zone_id,
         address_2: addressData.address_2 || "",
         custom_field: {
           "32": addressData.custom_field?.['32'] || "", // House Building
@@ -1047,9 +1047,11 @@ export default function CheckoutScreen() {
                   localAddress ? `${localAddress.firstname} ${localAddress.lastname}` : ''
                 }
               </Text>
-              <Text style={styles.addressLocation}>
-                Kuwait,
-              </Text>
+              {((isAuthenticated && selectedAddress?.country) || (!isAuthenticated && localAddress?.country)) && (
+                <Text style={styles.addressLocation}>
+                  {isAuthenticated && selectedAddress ? selectedAddress.country : localAddress?.country},
+                </Text>
+              )}
               <Text style={styles.addressLocation}>
                 {isAuthenticated && selectedAddress ? selectedAddress.city : localAddress?.city}, Area
               </Text>
@@ -1102,9 +1104,11 @@ export default function CheckoutScreen() {
                   <Text style={styles.addressName}>
                     {shippingAddress.firstname} {shippingAddress.lastname}
                   </Text>
-                  <Text style={styles.addressLocation}>
-                    Kuwait,
-                  </Text>
+                  {shippingAddress?.country && (
+                    <Text style={styles.addressLocation}>
+                      {shippingAddress.country},
+                    </Text>
+                  )}
                   <Text style={styles.addressLocation}>
                     {shippingAddress.city_name || shippingAddress.city}, {shippingAddress.zone || 'Area'}
                   </Text>

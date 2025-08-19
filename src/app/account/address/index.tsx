@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Address, useAddressStore } from '@store/address-store';
 import { useAuthStore } from '@store/auth-store';
 import { useLanguageStore } from '@store/language-store';
-import { getFlexDirection } from '@utils/rtlStyles';
+import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -108,8 +108,8 @@ export default function AddressScreen() {
     <View key={address.id} style={styles.addressCard}>
       <View style={styles.addressContent}>
         <Text style={styles.name}>{address.firstName} {address.lastName}</Text>
-        <Text style={styles.addressText}>Kuwait,</Text>
-        <Text style={styles.addressText}>{address.city || 'Salmiya'}</Text>
+        {!!address.country && <Text style={styles.addressText}>{address.country},</Text>}
+        <Text style={styles.addressText}>{address.city}</Text>
         <Text style={styles.addressText}>
           Block -{address.block}, Street-{address.street}, House Building -{address.houseNumber}{address.avenue ? ', Avenue-' + address.avenue : ''}
         </Text>
@@ -273,11 +273,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: theme.colors.black,
     marginBottom: theme.spacing.xs,
+    textAlign: getTextAlign(),
   },
   addressText: {
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.mediumGray,
     marginBottom: theme.spacing.xs / 2,
+    textAlign: getTextAlign(),
   },
   editButton: {
     flexDirection: getFlexDirection('row'),

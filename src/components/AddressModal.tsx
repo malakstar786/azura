@@ -16,10 +16,15 @@ export default function AddressModal({ visible, onClose, isNewAddress, address }
 
   useEffect(() => {
     (async () => {
-      const id = await getActiveCountryId();
-      setActiveCountryIdState(id);
+      // Prefer the incoming address country if present; otherwise use active stored country
+      if (address?.country_id) {
+        setActiveCountryIdState(address.country_id);
+      } else {
+        const id = await getActiveCountryId();
+        setActiveCountryIdState(id);
+      }
     })();
-  }, []);
+  }, [address?.country_id]);
 
   // Convert Address to FormData format
   const formData = address ? {
@@ -31,7 +36,7 @@ export default function AddressModal({ visible, onClose, isNewAddress, address }
     address_2: address.additionalDetails,
     city: address.city,
     postcode: '',
-    country_id: activeCountryId,
+    country_id: address.country_id || activeCountryId,
     zone_id: '',
     custom_field: {
       '30': address.block,

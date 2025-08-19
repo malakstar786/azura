@@ -1,18 +1,17 @@
 import { theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { API_ENDPOINTS, makeApiCall, setActiveCountryId, setActiveCurrencyCode } from '@utils/api-config';
-import { LocationService } from '@utils/location-service';
+import { API_ENDPOINTS, makeApiCall, setActiveCurrencyCode } from '@utils/api-config';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
-  Image,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    FlatList,
+    Image,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 interface Currency {
@@ -58,29 +57,7 @@ export default function CurrencyDropdown({ onCurrencyChange }: CurrencyDropdownP
             await setActiveCurrencyCode(selected.code);
             // Resolve country id via countries endpoint instead of hardcoding
             const title = (selected.title || '').toUpperCase();
-            const titleToCountryName: Record<string, string> = {
-              BRN: 'Bahrain',
-              JOR: 'Jordan',
-              KSA: 'Saudi Arabia',
-              KWT: 'Kuwait',
-              OMN: 'Oman',
-              QTR: 'Qatar',
-              UAE: 'United Arab Emirates'
-            };
-            const countries = await LocationService.getCountries();
-            const desiredName = titleToCountryName[title];
-            const match = countries.find((c) => c.name === desiredName);
-            // Safe fallback mapping (provided): BRN->17, JOR->108, KSA->184, KWT->114, OMN->161, QTR->173, UAE->221
-            const fallbackIdByTitle: Record<string, string> = {
-              BRN: '17',
-              JOR: '108',
-              KSA: '184',
-              KWT: '114',
-              OMN: '161',
-              QTR: '173',
-              UAE: '221',
-            };
-            await setActiveCountryId(match?.country_id || fallbackIdByTitle[title] || '114');
+            // Do not infer country from currency; rely on explicit country selection in address flows
           }
         }
       }
@@ -107,28 +84,7 @@ export default function CurrencyDropdown({ onCurrencyChange }: CurrencyDropdownP
       await setActiveCurrencyCode(currency.code);
       // Update active country id using countries endpoint
       const title = (currency.title || '').toUpperCase();
-      const titleToCountryName: Record<string, string> = {
-        BRN: 'Bahrain',
-        JOR: 'Jordan',
-        KSA: 'Saudi Arabia',
-        KWT: 'Kuwait',
-        OMN: 'Oman',
-        QTR: 'Qatar',
-        UAE: 'United Arab Emirates'
-      };
-      const countries = await LocationService.getCountries();
-      const desiredName = titleToCountryName[title];
-      const match = countries.find((c) => c.name === desiredName);
-      const fallbackIdByTitle: Record<string, string> = {
-        BRN: '17',
-        JOR: '108',
-        KSA: '184',
-        KWT: '114',
-        OMN: '161',
-        QTR: '173',
-        UAE: '221',
-      };
-      await setActiveCountryId(match?.country_id || fallbackIdByTitle[title] || '114');
+      // Do not infer country from currency; rely on explicit country selection in address flows
       setIsDropdownOpen(false);
       onCurrencyChange?.(currency);
     } catch (error) {

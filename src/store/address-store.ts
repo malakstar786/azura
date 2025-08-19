@@ -12,6 +12,10 @@ export interface Address {
   lastName: string;
   phone: string; // Will be empty if not provided by API
   city: string;
+  country?: string;
+  country_id?: string;
+  zone?: string;
+  zone_id?: string;
   block: string;
   street: string;
   houseNumber: string;
@@ -73,6 +77,10 @@ export const convertToUIAddress = (authAddress: any): Address => {
     lastName: authAddress.lastname || '',
     phone: authAddress.telephone || '', // Show telephone if present, empty if not
     city: authAddress.city || '',
+    country: authAddress.country || '',
+    country_id: authAddress.country_id || '',
+    zone: authAddress.zone || '',
+    zone_id: authAddress.zone_id || '',
     block: block,
     street: street,
     houseNumber: houseNumber,
@@ -140,6 +148,10 @@ export const useAddressStore = create<AddressStore>()(
                 lastName: addr.lastname,
                 phone: addr.telephone || '', // Show telephone if present, empty if not
                 city: addr.city,
+                country: addr.country || '',
+                country_id: addr.country_id || '',
+                zone: addr.zone || '',
+                zone_id: addr.zone_id || '',
                 block: typeof customField === 'object' ? customField['30'] || '' : '',
                 street: typeof customField === 'object' ? customField['31'] || '' : '',
                 houseNumber: typeof customField === 'object' ? customField['32'] || '' : '',
@@ -204,7 +216,7 @@ export const useAddressStore = create<AddressStore>()(
           console.log('Adding new address with data:', {
             firstname: address.firstName,
             lastname: address.lastName,
-            city: address.city || 'Kuwait City',
+            city: address.city,
             // zone_id removed from logs to avoid implying defaults
             address_1: address1,
             custom_fields: {
@@ -289,7 +301,7 @@ export const useAddressStore = create<AddressStore>()(
             address_id: id,
             firstname: address.firstName,
             lastname: address.lastName,
-            city: address.city || 'Kuwait City',
+            city: address.city,
             // zone_id removed from logs to avoid implying defaults
             address_1: address1,
             custom_fields: {
