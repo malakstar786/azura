@@ -62,6 +62,9 @@ export const translations = {
     'account.logout': 'LOGOUT',
     'account.followUs': 'FOLLOW US',
     'account.loading': 'Loading...',
+    'account.deleteData': 'Delete Data',
+    'account.deleteDataMessage': 'You will be redirected to delete your account data. When you return to the app, you will be logged out.',
+    'account.continue': 'Continue',
     
     // Orders
     'orders.title': 'My Orders',
@@ -229,11 +232,15 @@ export const translations = {
     
     // Details (Account Details)
     'details.title': 'MY DETAILS',
+    'details.editTitle': 'EDIT DETAILS',
     'details.fullName': 'FULL NAME',
+    'details.firstName': 'FIRST NAME',
+    'details.lastName': 'LAST NAME',
     'details.email': 'EMAIL',
     'details.mobile': 'MOBILE NUMBER',
     'details.password': 'PASSWORD',
     'details.editButton': 'EDIT DETAILS',
+    'details.saveButton': 'SAVE DETAILS',
     
     // Addresses
     'addresses.title': 'MY ADDRESS',
@@ -388,6 +395,9 @@ export const translations = {
     'account.logout': 'تسجيل الخروج',
     'account.followUs': 'تابعنا',
     'account.loading': 'جاري التحميل...',
+    'account.deleteData': 'حذف البيانات',
+    'account.deleteDataMessage': 'سيتم توجيهك لحذف بيانات حسابك. عند العودة للتطبيق، سيتم تسجيل خروجك.',
+    'account.continue': 'متابعة',
     
     // Orders
     'orders.title': 'طلباتي',
@@ -555,11 +565,15 @@ export const translations = {
     
     // Details (Account Details)
     'details.title': 'بياناتي',
+    'details.editTitle': 'تعديل البيانات',
     'details.fullName': 'الاسم الكامل',
+    'details.firstName': 'الاسم الأول',
+    'details.lastName': 'اسم العائلة',
     'details.email': 'البريد الإلكتروني',
     'details.mobile': 'رقم الجوال',
     'details.password': 'كلمة المرور',
     'details.editButton': 'تعديل البيانات',
+    'details.saveButton': 'حفظ البيانات',
     
     // Addresses
     'addresses.title': 'عنواني',

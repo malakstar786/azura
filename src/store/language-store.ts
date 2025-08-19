@@ -59,7 +59,6 @@ export const useLanguageStore = create<LanguageState>()(
       
       // Sets the language, updates I18nManager, and persists
       setLanguage: async (language: Language) => {
-        console.log(`Setting language to: ${language}`);
         const isNewRTL = language === 'ar';
         const directionChangeNeeded = I18nManager.isRTL !== isNewRTL;
 
@@ -75,7 +74,6 @@ export const useLanguageStore = create<LanguageState>()(
         try {
           await AsyncStorage.setItem('appLanguage', language);
         } catch (error) {
-          console.error('Failed to save language to AsyncStorage', error);
         }
 
         // Update store state so subscribers re-render immediately
@@ -113,13 +111,11 @@ export const useLanguageStore = create<LanguageState>()(
       
       // Update first-time user flag
       setIsFirstTimeUser: (isFirstTimeUser: boolean) => {
-        console.log(`Setting isFirstTimeUser to: ${isFirstTimeUser}`);
         
         // Persist the first-time user status in AsyncStorage immediately
         try {
           AsyncStorage.setItem('isFirstTimeUser', isFirstTimeUser ? 'true' : 'false');
         } catch (err) {
-          console.error('Error saving first-time user status:', err);
         }
         
         set({ isFirstTimeUser });
@@ -138,7 +134,6 @@ export const useLanguageStore = create<LanguageState>()(
       // Initializes language on app start
       init: async () => {
         try {
-          console.log("Initializing language store...");
           
           // Check if user has completed first-time setup
           const isFirstTimeUserStored = await AsyncStorage.getItem('isFirstTimeUser');
@@ -165,7 +160,6 @@ export const useLanguageStore = create<LanguageState>()(
                   await AsyncStorage.setItem('appLanguage', initialLanguage);
                 }
               } catch (e) {
-                console.error("Error parsing stored state:", e);
               }
             }
           }
@@ -175,13 +169,6 @@ export const useLanguageStore = create<LanguageState>()(
 
           // SAFE: Only update I18nManager if it's different and we're not in production
           const initialIsRTL = initialLanguage === 'ar';
-          
-          // Check if we need to change RTL
-          if (I18nManager.isRTL !== initialIsRTL) {
-            // In production, don't force RTL during initialization
-            // Let the user change it manually to avoid crashes
-            console.log('RTL change needed but skipping during initialization for safety');
-          }
           
           // Update theme RTL properties
           theme.rtl.isRTL = initialIsRTL;
@@ -196,7 +183,6 @@ export const useLanguageStore = create<LanguageState>()(
           });
 
         } catch (error) {
-          console.error('Failed to load language from AsyncStorage', error);
           // Fallback to default if error
           set({ 
             currentLanguage: 'en', 

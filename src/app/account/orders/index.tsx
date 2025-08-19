@@ -5,19 +5,18 @@ import { useAuthStore } from '@store/auth-store';
 import { useLanguageStore } from '@store/language-store';
 import { API_BASE_URL, API_ENDPOINTS, getCurrentOCSESSID } from '@utils/api-config';
 import { appendLanguageParam } from '@utils/api-language';
-import { getFlexDirection } from '@utils/rtlStyles';
+import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 interface Order {
@@ -108,10 +107,6 @@ export default function OrdersScreen() {
     }
   }, [searchQuery, orders]);
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchOrders();
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -148,10 +143,10 @@ export default function OrdersScreen() {
 
   const renderOrderItem = (order: Order) => (
     <View key={order.order_id} style={styles.orderCard}>
-      <View style={styles.orderHeader}>
+      <View style={[styles.orderHeader, { flexDirection: getFlexDirection('row') }]}>
         <View style={styles.orderIdContainer}>
-          <Text style={styles.orderIdLabel}>{t('orders.orderId')}</Text>
-          <Text style={styles.orderIdValue}>#{order.order_id}</Text>
+          <Text style={[styles.orderIdLabel, { textAlign: getTextAlign() }]}>{t('orders.orderId')}</Text>
+          <Text style={[styles.orderIdValue, { textAlign: getTextAlign() }]}>#{order.order_id}</Text>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) }]}>
           <Text style={styles.statusText}>{getTranslatedStatus(order.status)}</Text>
@@ -159,17 +154,17 @@ export default function OrdersScreen() {
       </View>
       
       <View style={styles.orderDetails}>
-        <View style={styles.orderRow}>
+        <View style={[styles.orderRow, { flexDirection: getFlexDirection('row') }]}>
           <Text style={styles.orderLabel}>{t('orders.customer')}</Text>
           <Text style={styles.orderValue}>{order.firstname} {order.lastname}</Text>
         </View>
         
-        <View style={styles.orderRow}>
+        <View style={[styles.orderRow, { flexDirection: getFlexDirection('row') }]}>
           <Text style={styles.orderLabel}>{t('orders.date')}</Text>
           <Text style={styles.orderValue}>{formatDate(order.date_added)}</Text>
         </View>
         
-        <View style={styles.orderRow}>
+        <View style={[styles.orderRow, { flexDirection: getFlexDirection('row') }]}>
           <Text style={styles.orderLabel}>{t('orders.total')}</Text>
           <Text style={styles.orderTotal}>{order.total} {order.currency_code}</Text>
         </View>
@@ -202,14 +197,19 @@ export default function OrdersScreen() {
           title: '',
           headerBackTitle: '',
           headerTintColor: theme.colors.black,
+          headerShadowVisible: false,
         }}
       />
 
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>{t('orders.title')}</Text>
+        <View style={styles.divider} />
+
+        <View style={styles.searchContainer}>
+        <View style={[styles.searchInputContainer, { flexDirection: getFlexDirection('row') }]}>
           <Ionicons name="search" size={20} color={theme.colors.mediumGray} style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { textAlign: getTextAlign() }]}
             placeholder={t('orders.searchPlaceholder')}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -223,13 +223,6 @@ export default function OrdersScreen() {
         </View>
       </View>
 
-      <ScrollView 
-        style={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        showsVerticalScrollIndicator={false}
-      >
         {filteredOrders.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Ionicons name="receipt-outline" size={64} color={theme.colors.mediumGray} />
@@ -272,10 +265,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.white,
   },
+  content: {
+    flexGrow: 1,
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+  },
+  title: {
+    fontSize: theme.typography.sizes.xxxl,
+    fontWeight: theme.typography.weights.bold as any,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
+  },
+  divider: {
+    height: 2,
+    backgroundColor: theme.colors.black,
+    marginBottom: theme.spacing.lg,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: theme.spacing.xxl,
   },
   loadingText: {
     marginTop: theme.spacing.md,
@@ -283,34 +293,29 @@ const styles = StyleSheet.create({
     color: theme.colors.black,
   },
   searchContainer: {
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.md,
-    backgroundColor: theme.colors.lightGray,
+    marginBottom: theme.spacing.sm,
   },
   searchInputContainer: {
-    flexDirection: getFlexDirection('row'),
     alignItems: 'center',
     backgroundColor: theme.colors.white,
-    borderRadius: theme.borderRadius.lg,
+    borderRadius: 0,
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: theme.spacing.md,
     borderWidth: 1,
-    borderColor: theme.colors.borderColor,
+    borderColor: theme.colors.black,
   },
   searchIcon: {
     marginEnd: theme.spacing.sm,
   },
   searchInput: {
     flex: 1,
-    fontSize: theme.typography.sizes.md,
+    fontSize: theme.typography.sizes.lg,
     color: theme.colors.black,
   },
   clearButton: {
     marginStart: theme.spacing.sm,
   },
-  content: {
-    flex: 1,
-  },
+
   ordersContainer: {
     padding: theme.spacing.md,
   },
@@ -322,15 +327,13 @@ const styles = StyleSheet.create({
   },
   orderCard: {
     backgroundColor: theme.colors.white,
-    borderRadius: theme.borderRadius.lg,
+    borderRadius: 0,
     padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.lg,
     borderWidth: 1,
-    borderColor: theme.colors.borderColor,
-    ...theme.shadows.md,
+    borderColor: theme.colors.black,
   },
   orderHeader: {
-    flexDirection: getFlexDirection('row'),
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: theme.spacing.md,
@@ -362,7 +365,6 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
   },
   orderRow: {
-    flexDirection: getFlexDirection('row'),
     justifyContent: 'space-between',
     alignItems: 'center',
   },

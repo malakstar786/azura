@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCartStore } from '@store/cart-store';
 import {
-  API_BASE_URL,
   API_ENDPOINTS,
   generateRandomOCSESSID,
   getOrCreateOCSESSID,
@@ -103,8 +102,6 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
 
-          console.log('Attempting login with:', { email });
-
           // Generate and set a new OCSESSID for the session
           const ocsessid = await getOrCreateOCSESSID();
           await setOCSESSID(ocsessid);
@@ -116,8 +113,6 @@ export const useAuthStore = create<AuthState>()(
               password
             }
           });
-
-          console.log('Login response:', response);
 
           if (response.success === 1 && response.data) {
             // Update user state with the correct data structure
@@ -177,13 +172,6 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
 
-          console.log('🔥 AUTH STORE: Attempting signup with:', { 
-            email: userData.email,
-            firstname: userData.firstname,
-            lastname: userData.lastname,
-            telephone: userData.telephone
-          });
-
           // Generate and use a fresh OCSESSID for registration
           const freshOCSESSID = await generateRandomOCSESSID();
           await setOCSESSID(freshOCSESSID);
@@ -198,8 +186,6 @@ export const useAuthStore = create<AuthState>()(
             password: userData.password
           };
 
-          console.log('📤 AUTH STORE: Sending signup request with data:', JSON.stringify(signupData, null, 2));
-          console.log('🌐 AUTH STORE: Making API call to:', `${API_BASE_URL}${API_ENDPOINTS.register}`);
 
           try {
             const response = await makeApiCall(API_ENDPOINTS.register, {
@@ -207,16 +193,12 @@ export const useAuthStore = create<AuthState>()(
               data: signupData
             });
 
-            console.log('✅ AUTH STORE: Signup response received:', JSON.stringify(response, null, 2));
 
             if (response.success === 1) {
-              console.log('🚀 AUTH STORE: Signup successful! Attempting auto-login...');
               // If signup is successful, automatically log in
               try {
                 await get().login(userData.email, userData.password);
-                console.log('✅ AUTH STORE: Auto-login after signup successful');
               } catch (loginError) {
-                console.error('❌ AUTH STORE: Auto-login after signup failed:', loginError);
                 // Still consider signup successful even if auto-login fails
                 set({
                   isLoading: false,
@@ -317,22 +299,16 @@ export const useAuthStore = create<AuthState>()(
             return [];
           }
 
-          console.log('Fetching addresses from server...');
-          
           // Use the proper addresses endpoint with GET method
           const response = await makeApiCall(API_ENDPOINTS.addresses, {
             method: 'GET'
           });
 
-          console.log('Addresses fetch response:', response);
-
           if (response.success === 1 && Array.isArray(response.data)) {
             // We got an array of addresses from the server
-            console.log('Successfully retrieved addresses:', response.data);
             return response.data;
           } else {
             // Probably an empty array or an error
-            console.warn('Unexpected address response format:', response);
             return [];
           }
         } catch (error: any) {
@@ -380,13 +356,6 @@ export const useAuthStore = create<AuthState>()(
           // Add default flag
           formData.append('default', address.default ? '1' : '0');
           
-          console.log('Adding address with data:', {
-            firstname: address.firstname,
-            lastname: address.lastname,
-            city: address.city,
-            custom_fields: address.custom_field
-          });
-          
           const response = await makeApiCall(API_ENDPOINTS.editAddress, {
             method: 'POST',
             data: formData,
@@ -394,8 +363,6 @@ export const useAuthStore = create<AuthState>()(
               'Content-Type': 'multipart/form-data'
             }
           });
-          
-          console.log('Add address API response:', response);
           
           if (response.success === 1) {
             // Fetch updated addresses
@@ -484,17 +451,10 @@ export const useAuthStore = create<AuthState>()(
           formData.append('firstname', get().user?.firstname || '');
           formData.append('lastname', get().user?.lastname || '');
           
-          console.log('Deleting address:', {
-            address_id: addressId,
-            remove: '1'
-          });
-          
           const response = await makeApiCall(API_ENDPOINTS.editAddress, {
             method: 'POST',
             data: formData
           });
-          
-          console.log('Delete address response:', response);
           
           if (response.success === 1) {
             // Address deleted successfully
@@ -550,7 +510,6 @@ export const useAuthStore = create<AuthState>()(
             return false;
           }
         } catch (error: any) {
-          console.warn('Session validation failed:', error);
           // Session invalid, clear auth state
           set({ 
             isAuthenticated: false, 

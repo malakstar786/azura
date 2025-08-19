@@ -7,15 +7,15 @@ import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Dimensions,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -146,7 +146,13 @@ export default function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
       <View style={[styles.overlay, { 
         flexDirection: getFlexDirection('row') 
       }]}>
-        <View style={styles.drawer}>
+        <View
+          style={[
+            styles.drawer,
+            { position: 'absolute', zIndex: 2, top: 0, bottom: 0 },
+            isRTL ? { right: 0 } : { left: 0 },
+          ]}
+        >
           {/* Header */}
           <View style={[styles.header, { 
             flexDirection: getFlexDirection('row') 

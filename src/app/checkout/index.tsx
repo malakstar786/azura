@@ -27,8 +27,6 @@ if (Platform.OS === 'ios') {
     PaymentNetwork = mod.PaymentNetwork;
     isApplePayModuleAvailable = true;
   } catch (e) {
-    console.log('Apple Pay error', e);
-    console.warn('[ApplePay] Native module not available in this build. Rebuild the dev client to enable Apple Pay.', e);
     isApplePayModuleAvailable = false;
   }
 }
@@ -95,7 +93,6 @@ export default function CheckoutScreen() {
     const startTime = Date.now();
     const sessionId = `APL_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    console.log('🍏 [ApplePay] ========== APPLE PAY FLOW START ==========');
     
     // Availability & platform validation
     if (!isApplePayModuleAvailable) {
@@ -103,33 +100,25 @@ export default function CheckoutScreen() {
       return false;
     }
     if (Platform.OS !== 'ios') {
-      console.log('❌ [ApplePay] Aborting Apple Pay flow');
       Alert.alert('Apple Pay is only available on iOS.');
       return false;
     }
-    console.log('✅ [ApplePay] Platform check passed - iOS detected');
 
     // Device capability checks
     setApplePayLoading(true);
     
     try {
-      console.log('🍏 [ApplePay] ========== PAYMENT CALCULATION PHASE ==========');
       
       // Calculate total amount for Apple Pay
       const totalAmount = parsePrice(formatPrice(orderTotal));
       
       // Validation checks
       if (isNaN(totalAmount) || totalAmount <= 0) {
-        console.error('❌ [ApplePay] Invalid total amount calculated:', totalAmount);
         throw new Error('Invalid payment amount calculated');
       }
-      console.log('✅ [ApplePay] Payment amount validation passed');
       
-      console.log('🍏 [ApplePay] ========== PAYMENT REQUEST PREPARATION ==========');
-
       
       // Prepare Apple Pay request with detailed line items for better user experience
-      console.log('🍏 [ApplePay] Configuring payment request object...');
       
       const paymentRequest = {
         merchantIdentifier: 'merchant.kw.com.azura',
@@ -160,16 +149,11 @@ export default function CheckoutScreen() {
         ]
       };
       
-      console.log('🍏 [ApplePay] Payment request configuration complete:');
-      
-      console.log('🍏 [ApplePay] ========== APPLE PAY SHEET PRESENTATION ==========');
-
       // Request Apple Pay payment
       const paymentSheetStartTime = Date.now();
       const paymentResponse = await ApplePay.show(paymentRequest);
       const paymentSheetDuration = Date.now() - paymentSheetStartTime;
       
-      console.log('🍏 [ApplePay] ========== PAYMENT AUTHORIZATION RECEIVED ==========');
       
       if (paymentResponse) {
         
@@ -178,18 +162,14 @@ export default function CheckoutScreen() {
         // Log specific Apple Pay response properties if they exist
         const responseAny = paymentResponse as any;
         if (responseAny.data) {
-          console.log('🔍 [ApplePay] - Payment data type:', typeof responseAny.data);
-          console.log('🔍 [ApplePay] - Payment data content:', JSON.stringify(responseAny.data, null, 2));
         }
         if (responseAny.transactionId) {
-          console.log('🔍 [ApplePay] - Transaction ID:', responseAny.transactionId);
         }
       }
       
       // Generate track ID
       const trackId = `ORDER_${Date.now()}`;
 
-      console.log('🍏 [ApplePay] ========== BACKEND PROCESSING PREPARATION ==========');
       
       // Extract payment network and construct payment method object
       const paymentNetwork = (paymentResponse as any).paymentNetwork;
@@ -211,11 +191,8 @@ export default function CheckoutScreen() {
         order_id: orderId
       };
       
-      console.log('🍏 [ApplePay] Backend request payload prepared:');
-      
       const apiEndpoint = `${API_BASE_URL}/index.php?route=extension/opencart/payment/applepay_knet|processPaymentApp`;
       
-      console.log('🍏 [ApplePay] Initiating backend API call...');
       const apiCallStartTime = Date.now();
       
       const processResponse = await fetch(apiEndpoint, {
@@ -228,30 +205,23 @@ export default function CheckoutScreen() {
       if (!processResponse.ok) {
         throw new Error(`Server error: ${processResponse.status} ${processResponse.statusText}`);
       }
-      console.log('✅ [ApplePay] HTTP response validation passed');
       
       
       // Check if the response is valid JSON
       let result;
       try {
-        console.log('🍏 [ApplePay] Extracting response text...');
         const responseText = await processResponse.text();
         
         // Check if response starts with HTML (common error case)
         if (responseText.trim().startsWith('<')) {
-          console.error('❌ [ApplePay] Response format error: Server returned HTML instead of JSON');
-          console.error('❌ [ApplePay] HTML response preview:', responseText.substring(0, 300));
           throw new Error('Server returned HTML instead of JSON. Possible server error.');
         }
         
         // Validate JSON format
         if (!responseText.trim().startsWith('{') && !responseText.trim().startsWith('[')) {
-          console.error('❌ [ApplePay] Response format error: Not valid JSON format');
-          console.error('❌ [ApplePay] Response content:', responseText);
           throw new Error('Server response is not in JSON format');
         }
         
-        console.log('🍏 [ApplePay] Parsing JSON response...');
         // Parse JSON
         result = JSON.parse(responseText);
         
@@ -263,10 +233,7 @@ export default function CheckoutScreen() {
       
       if (result.status === 'success') {      
         await ApplePay.complete(CompleteStatus.success);
-        console.log('✅ [ApplePay] Apple Pay SDK notified of successful completion');
-  
         await clearCart();
-        console.log('✅ [ApplePay] Shopping cart cleared successfully');
         
         // Prepare success page data using confirmed order data (same fields as WebView)
         const baseOrderData = confirmedOrderData || orderConfirmationData;
@@ -282,56 +249,38 @@ export default function CheckoutScreen() {
             payment_method: baseOrderData.payment_method,
             line_items: baseOrderData.line_items,
           };
-          console.log('🍏 [ApplePay] Success page data prepared:', JSON.stringify(orderData, null, 2));
           router.replace({
             pathname: '/order-success',
             params: { orderData: JSON.stringify(orderData) }
           });
         } else {
-          console.log('🍏 [ApplePay] No order data available, navigating to success without params');
           router.replace('/order-success');
         }
-        console.log('✅ [ApplePay] Navigation to success page completed');
-        console.log('✅ [ApplePay] Apple Pay flow completed successfully');
         return true;
       } else {
-        console.log('🍏 [ApplePay] ========== FAILURE FLOW ==========');
-        
-        console.log('🍏 [ApplePay] Completing Apple Pay transaction with failure status...');
         await ApplePay.complete(CompleteStatus.failure);
-        console.log('✅ [ApplePay] Apple Pay SDK notified of failure completion');
         
         const errorMessage = result.message || 'An error occurred during payment processing.';
-        console.log('🍏 [ApplePay] Showing error alert to user:', errorMessage);
         Alert.alert('Payment Failed', errorMessage);
         
-        console.log('🍏 [ApplePay] Navigating to order failure page...');
         router.replace('/order-failure');
-        console.log('✅ [ApplePay] Navigation to failure page completed');
         return false;
       }
     } catch (error: any) {
-      console.log('🍏 [ApplePay] ========== ERROR HANDLING ==========');
-      console.error('❌ [ApplePay] Payment flow encountered an error');
-      console.error('❌ [ApplePay] Error type:', typeof error);
       
       const userErrorMessage = error?.message || 'Apple Pay payment failed';
       Alert.alert('Apple Pay Error', userErrorMessage);
       
       // Ensure we complete the payment with failure if needed
-      console.log('🍏 [ApplePay] Attempting to complete Apple Pay transaction with failure status...');
       try {
         await ApplePay.complete(CompleteStatus.failure);
-        console.log('✅ [ApplePay] Successfully notified Apple Pay SDK of failure');
       } catch (completeError: any) {
-        console.error('❌ [ApplePay] Critical: Failed to complete Apple Pay transaction');
         // Ignore errors when completing payment in error state
       }
       return false;
     } finally {
       const totalDuration = Date.now() - startTime;
       setApplePayLoading(false);
-      console.log('🍏 [ApplePay] ========== APPLE PAY FLOW END ==========');
     }
   };
 
@@ -377,7 +326,6 @@ export default function CheckoutScreen() {
         method: 'GET'
       });
       
-      console.log('🏠 [Addresses] Raw API response:', JSON.stringify(response, null, 2));
       
       if (response.success === 1 && Array.isArray(response.data) && response.data.length > 0) {
         
@@ -422,7 +370,6 @@ export default function CheckoutScreen() {
       await AsyncStorage.setItem('@checkout_local_address', addressJson);
       setLocalAddress(address);
     } catch (error) {
-      console.error('❌ [Save Local Address] Error saving local address:', error);
     }
   };
 
@@ -442,12 +389,6 @@ export default function CheckoutScreen() {
         
         // Get user's email and phone from auth store
         const { user } = useAuthStore.getState();
-        console.log('🔄 [Address Setup] User from auth store:', user ? {
-          email: user.email,
-          telephone: user.telephone,
-          firstname: user.firstname,
-          lastname: user.lastname
-        } : 'No user data');
         
         // Set payment address in checkout session using complete address data
         const addressData = {
@@ -517,7 +458,6 @@ export default function CheckoutScreen() {
       await fetchShippingAndPaymentMethods();
 
     } catch (error) {
-      console.error('❌ [Address Setup] Error setting address in checkout session:', error);
       setShippingMethods([]);
       setPaymentMethods([]);
       setSelectedShippingMethod(null);
@@ -578,7 +518,6 @@ export default function CheckoutScreen() {
           setSelectedShippingMethod(null);
         }
       } else {
-        console.log('🚚 [Shipping] Shipping response unsuccessful or no data');
       }
       
       // Fetch payment methods with language parameter
@@ -626,7 +565,6 @@ export default function CheckoutScreen() {
       setSelectedPaymentMethod(null);
     }
     
-    console.log('🚚💳 [Methods] Shipping and payment methods fetch completed');
   };
 
   const handleEditAddress = () => {
@@ -654,8 +592,6 @@ export default function CheckoutScreen() {
   };
 
   const handleShippingMethodSelection = async (method: any) => {
-    console.log('🚚 [Shipping Selection] User selected shipping method');
-    console.log('🚚 [Shipping Selection] Selected method:', JSON.stringify(method, null, 2));
     
     setSelectedShippingMethod(method);
     
@@ -674,7 +610,6 @@ export default function CheckoutScreen() {
       } else {
       }
     } catch (error) {
-      console.error('❌ [Shipping Selection] Error setting shipping method:', error);
     }
   };
 
@@ -701,7 +636,6 @@ export default function CheckoutScreen() {
       } else {
       }
     } catch (error) {
-      console.error('❌ [Payment Selection] Error setting payment method:', error);
     }
   };
 
@@ -771,7 +705,6 @@ export default function CheckoutScreen() {
       
       // Clear cart
       await clearCart();
-      console.log('🛒 [Order] Cart cleared');
 
       // Extract important order data for success page
       const orderData = {
@@ -801,8 +734,6 @@ export default function CheckoutScreen() {
   // Handle payment WebView navigation changes
   const handlePaymentNavigation = async (navState: any) => {
     const currentUrl = navState.url;
-    console.log('🌐 [WebView Navigation] Payment WebView navigation event');
-    console.log('🌐 [WebView Navigation] Current URL:', currentUrl);
     
     // Monitor for success URL
     if (currentUrl.includes('checkout/success')) {
@@ -813,7 +744,6 @@ export default function CheckoutScreen() {
       
       // Clear cart
       await clearCart();
-      console.log('✅ [WebView Navigation] Cart cleared successfully');
       
       // Prepare order data for success page using stored confirmation data
       if (orderConfirmationData) {
@@ -829,13 +759,11 @@ export default function CheckoutScreen() {
           line_items: orderConfirmationData.line_items,
         };
         
-        console.log('✅ [WebView Navigation] Navigating to success page with order data:', JSON.stringify(orderData, null, 2));
         router.replace({
           pathname: '/order-success',
           params: { orderData: JSON.stringify(orderData) }
         });
       } else {
-        console.log('✅ [WebView Navigation] No order confirmation data available, navigating without data');
         router.replace('/order-success');
       }
       return;
@@ -924,7 +852,6 @@ export default function CheckoutScreen() {
           throw new Error(response.error?.[0] || 'Failed to add address');
         }
       } else {
-        console.log('🏠 [Add Address] Processing unauthenticated user address');
         
         // For unauthenticated users, save in the same format as API response
         const localAddressData = {
@@ -955,7 +882,6 @@ export default function CheckoutScreen() {
         return true;
       }
     } catch (error: any) {
-      console.error('❌ [Add Address] Error adding payment address:', error);
       Alert.alert('Error', error.message || 'Failed to add address');
       return false;
     }
@@ -986,8 +912,6 @@ export default function CheckoutScreen() {
         }
       };
 
-      console.log('Adding shipping address:', requestData);
-
       const response = await makeApiCall('/index.php?route=extension/mstore/shipping_address|save', {
         method: 'POST',
         data: requestData,
@@ -996,7 +920,6 @@ export default function CheckoutScreen() {
         }
       });
 
-      console.log('Shipping address response:', response);
 
       if (response.success === 1) {
         // Use the response data directly for shipping address

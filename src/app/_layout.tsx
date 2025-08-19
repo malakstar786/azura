@@ -26,11 +26,7 @@ function RootLayout() {
     
     async function prepare() {
       try {
-        // For debugging - uncomment to reset specific parts of app state
-        // await resetAppState(); // Reset all app state
-        // await clearNavigationLock(); // Only clear navigation lock
-        // await resetFirstTimeUser(); // Only reset first-time user flag
-        
+
 
         // Initialize OCSESSID first with extra safety
         try {
@@ -132,14 +128,6 @@ function RootLayout() {
           <Stack.Screen 
             name="auth" 
             options={{ headerShown: true }} 
-          />
-          <Stack.Screen
-            name="orders/index"
-            options={{
-              headerShown: false,
-              animation: isRTL ? 'slide_from_left' : 'slide_from_right',
-              presentation: 'card'
-            }}
           />
           <Stack.Screen
             name="checkout"

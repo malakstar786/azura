@@ -8,7 +8,7 @@ import { useLanguageStore } from '@store/language-store';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 // Define the interface for AddressFormData to match AddEditAddress component
 interface AddressFormData {
@@ -44,22 +44,15 @@ export default function AddressScreen() {
   // Fetch addresses when the component mounts
   useEffect(() => {
     if (isAuthenticated) {
-      console.log('Fetching addresses...');
       fetchAddresses()
-        .then(() => {
-          console.log('Addresses fetched successfully');
-        })
+
         .catch((error) => {
           console.error('Error fetching addresses:', error);
         });
     }
   }, [isAuthenticated, fetchAddresses]);
 
-  // Log addresses when they change
-  useEffect(() => {
-    console.log('Current addresses:', addresses);
-  }, [addresses]);
-
+ 
   const handleAddAddress = () => {
     setEditingAddress(undefined);
     setIsModalVisible(true);
@@ -146,11 +139,26 @@ export default function AddressScreen() {
           <ActivityIndicator size="large" color={theme.colors.black} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.title}>{t('addresses.title')}</Text>
-          <View style={styles.divider} />
-
-          {addresses.length === 0 ? (
+        <FlatList
+          data={addresses}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => renderAddress(item)}
+          ListHeaderComponent={(
+            <View style={styles.listHeader}>
+              <Text style={styles.title}>{t('addresses.title')}</Text>
+              <View style={styles.divider} />
+            </View>
+          )}
+          ListFooterComponent={(
+            <Pressable 
+              style={[styles.addAddressButton, styles.addMoreButton]}
+              onPress={handleAddAddress}
+            >
+              <Ionicons name="add" size={20} color={theme.colors.black} style={styles.addIcon} />
+              <Text style={styles.addAddressText}>{t('addresses.addNew')}</Text>
+            </Pressable>
+          )}
+          ListEmptyComponent={(
             <View style={styles.emptyStateContainer}>
               <Text style={styles.emptyStateTitle}>{t('addresses.noAddresses')}</Text>
               <Text style={styles.emptyStateSubtitle}>
@@ -163,19 +171,11 @@ export default function AddressScreen() {
                 <Text style={styles.addAddressText}>{t('addresses.addNew')}</Text>
               </Pressable>
             </View>
-          ) : (
-            <>
-              {addresses.map(renderAddress)}
-              <Pressable 
-                style={[styles.addAddressButton, styles.addMoreButton]}
-                onPress={handleAddAddress}
-              >
-                <Ionicons name="add" size={20} color={theme.colors.black} style={styles.addIcon} />
-                <Text style={styles.addAddressText}>{t('addresses.addNew')}</Text>
-              </Pressable>
-            </>
           )}
-        </ScrollView>
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator
+          keyboardShouldPersistTaps="handled"
+        />
       )}
 
       {isModalVisible && (
@@ -206,6 +206,15 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+  },
+  listHeader: {
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+  },
+  listContent: {
+    paddingHorizontal: theme.spacing.md,
+    paddingBottom: theme.spacing.xxl * 2,
     paddingTop: theme.spacing.md,
   },
   title: {

@@ -108,7 +108,6 @@ export default function Auth() {
       setLoginErrors({});
       
       try {
-        console.log('Login attempt with:', { email: loginForm.email });
         await login(loginForm.email, loginForm.password);
         
         // Router will handle redirection in the useEffect hook
@@ -122,8 +121,6 @@ export default function Auth() {
     };
 
     const handleSignup = async () => {
-      console.log('🔥 AUTH.TSX: SIGNUP BUTTON PRESSED - handleSignup called');
-      console.log('📋 AUTH.TSX: Current signup form data:', signupForm);
       
       // Validate all required fields
       const validationErrors: { firstname?: string; lastname?: string; email?: string; telephone?: string; password?: string } = {};
@@ -152,12 +149,10 @@ export default function Auth() {
       }
       
       if (Object.keys(validationErrors).length > 0) {
-        console.error('❌ AUTH.TSX: Validation failed:', validationErrors);
         setSignupErrors(validationErrors);
         return;
       }
       
-      console.log('✅ AUTH.TSX: Validation passed, starting signup process...');
       setIsLoading(true);
       setSignupErrors({});
       
@@ -172,15 +167,9 @@ export default function Auth() {
       try {
         await signup(userData);
         
-        console.log('✅ AUTH.TSX: Signup successful, redirection will be handled by useEffect');
         // Router will handle redirection in the useEffect hook
       } catch (error: any) {
-        console.error('❌ AUTH.TSX: Signup error occurred:', error);
-        console.error('❌ AUTH.TSX: Error details:', {
-          message: error.message,
-          stack: error.stack,
-          name: error.name
-        });
+        console.error('AUTH.TSX: Signup error occurred:', error);
         
         let errorMessage = error?.message || t('auth.registrationError');
         
@@ -191,7 +180,6 @@ export default function Auth() {
           errorMessage = t('auth.registrationError');
         }
         
-        console.error('🔴 AUTH.TSX: Final error message shown to user:', errorMessage);
         
         // If the message hints at an email conflict, show it under the email field.
         if (/mail|email|exists/i.test(errorMessage)) {
@@ -204,7 +192,6 @@ export default function Auth() {
         Alert.alert(t('common.error'), errorMessage);
       } finally {
         setIsLoading(false);
-        console.log('🏁 AUTH.TSX: Signup process completed');
       }
     };
 
@@ -229,6 +216,7 @@ export default function Auth() {
             autoCapitalize="none"
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
+            textAlign={getTextAlign()}
           />
           {loginErrors.email ? <Text style={styles.errorText}>{loginErrors.email}</Text> : null}
         </View>
@@ -243,6 +231,7 @@ export default function Auth() {
               secureTextEntry={!showLoginPassword}
               placeholderTextColor={theme.colors.mediumGray}
               editable={!isLoading}
+              textAlign={getTextAlign()}
             />
             <TouchableOpacity
               style={styles.eyeButton}
@@ -310,6 +299,7 @@ export default function Auth() {
             onChangeText={text => handleSignupInputChange('firstname', text)}
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
+            textAlign={getTextAlign()}
           />
           {signupErrors.firstname ? <Text style={styles.errorText}>{signupErrors.firstname}</Text> : null}
         </View>
@@ -321,6 +311,7 @@ export default function Auth() {
             onChangeText={text => handleSignupInputChange('lastname', text)}
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
+            textAlign={getTextAlign()}
           />
           {signupErrors.lastname ? <Text style={styles.errorText}>{signupErrors.lastname}</Text> : null}
         </View>
@@ -335,6 +326,7 @@ export default function Auth() {
             autoCapitalize="none"
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
+            textAlign={getTextAlign()}
           />
           {signupErrors.email ? <Text style={styles.errorText}>{signupErrors.email}</Text> : null}
         </View>
@@ -348,6 +340,7 @@ export default function Auth() {
             keyboardType="phone-pad"
             placeholderTextColor={theme.colors.mediumGray}
             editable={!isLoading}
+            textAlign={getTextAlign()}
           />
           {signupErrors.telephone ? <Text style={styles.errorText}>{signupErrors.telephone}</Text> : null}
         </View>
@@ -362,6 +355,7 @@ export default function Auth() {
               secureTextEntry={!showSignupPassword}
               placeholderTextColor={theme.colors.mediumGray}
               editable={!isLoading}
+              textAlign={getTextAlign()}
             />
             <TouchableOpacity
               style={styles.eyeButton}

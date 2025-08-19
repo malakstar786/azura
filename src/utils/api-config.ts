@@ -76,7 +76,7 @@ export const generateRandomOCSESSID = async (): Promise<string> => {
 export const setOCSESSID = async (ocsessid: string): Promise<void> => {
   try {
     await AsyncStorage.setItem(OCSESSID_STORAGE_KEY, ocsessid);
-    console.log(`Stored OCSESSID: ${ocsessid}`);
+    console.log(`[API] Stored OCSESSID: ${ocsessid?.slice(0, 6)}***${ocsessid?.slice(-4)}`);
     // Add a small delay to ensure the OCSESSID is properly stored
     await new Promise(resolve => setTimeout(resolve, 100));
   } catch (error) {
@@ -90,10 +90,9 @@ export const getCurrentOCSESSID = async (): Promise<string | null> => {
   try {
     const storedOcsessid = await AsyncStorage.getItem(OCSESSID_STORAGE_KEY);
     if (!storedOcsessid) {
-      console.log('No OCSESSID found in storage');
+      console.log('[API] No OCSESSID found in storage');
       return null;
     }
-    console.log(`Retrieved OCSESSID: ${storedOcsessid}`);
     return storedOcsessid;
   } catch (error) {
     console.error('Failed to get OCSESSID:', error);
@@ -122,6 +121,32 @@ export const getOrCreateOCSESSID = async (): Promise<string> => {
   }
 };
 
+// ---- Debug helpers ----
+function maskValue(value: string | null | undefined): string {
+  if (!value || typeof value !== 'string') return String(value);
+  if (value.length <= 6) return `${value.slice(0, 2)}***`;
+  return `${value.slice(0, 6)}***${value.slice(-4)}`;
+}
+
+function stringifySafe(obj: any): string {
+  try {
+    if (obj instanceof FormData) {
+      // React Native FormData keeps parts in _parts
+      const parts: any[] = (obj as any)._parts || [];
+      const simplified = parts.map(([k, v]) => {
+        if (k === 'telephone' || k === 'email') {
+          return [k, maskValue(String(v))];
+        }
+        return [k, typeof v === 'string' ? v : '[object]'];
+      });
+      return JSON.stringify({ formDataParts: simplified });
+    }
+    return JSON.stringify(obj);
+  } catch (e) {
+    return '[unserializable]';
+  }
+}
+
 // Function to check if an error is a network error
 export const isNetworkError = (error: any): boolean => {
   return (
@@ -147,7 +172,6 @@ export const makeApiCall = async <T = any>(
   try {
     // Ensure we have a valid OCSESSID
     const currentOcsessid = await getOrCreateOCSESSID();
-    console.log(`Using OCSESSID for request: ${currentOcsessid}`);
     
     // Set default method to GET if not provided
     const method = options.method || 'GET';
@@ -178,16 +202,7 @@ export const makeApiCall = async <T = any>(
     
     // For FormData, don't set Content-Type manually - let axios handle it with proper boundary
     
-    // Log request details
-    console.log(`Making ${method} request to ${url}`);
-    console.log('Request headers:', headers);
-    if (options.data) {
-      if (options.data instanceof FormData) {
-        console.log('Request data: FormData');
-      } else {
-        console.log('Request data:', options.data);
-      }
-    }
+    
     
     // Make the request with timeout and credentials
     const axiosConfig = {
@@ -202,7 +217,7 @@ export const makeApiCall = async <T = any>(
         
         // Check if the response contains HTML mixed with JSON
         if (data.includes('<b>Warning</b>') || data.includes('<b>Error</b>')) {
-          console.log('Removing HTML content from response');
+          
           
           // Extract just the JSON part from the response
           const jsonStart = data.indexOf('{');
@@ -210,7 +225,6 @@ export const makeApiCall = async <T = any>(
             try {
               return JSON.parse(data.substring(jsonStart));
             } catch (e) {
-              console.error('Error parsing JSON from mixed content:', e);
               // Return the original data if parsing fails
               return data;
             }
@@ -227,30 +241,42 @@ export const makeApiCall = async <T = any>(
       }]
     };
 
+    // Use fetch for FormData POSTs to avoid RN axios content-type quirks
+    if (method.toUpperCase() === 'POST' && options.data instanceof FormData) {
+      const fetchHeaders: Record<string, string> = {
+        'Accept': 'application/json',
+        'User-Agent': 'Azura Mobile App',
+        'Cookie': `OCSESSID=${currentOcsessid}`
+      };
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: fetchHeaders,
+        body: options.data
+      });
+      const text = await res.text();
+      let parsed: any = text;
+      try {
+        if (text.includes('<b>Warning</b>') || text.includes('<b>Error</b>')) {
+          const jsonStart = text.indexOf('{');
+          if (jsonStart >= 0) parsed = JSON.parse(text.substring(jsonStart));
+        } else {
+          parsed = JSON.parse(text);
+        }
+      } catch {}
+      return parsed;
+    }
+
+    // Default axios path
     let response;
     if (method.toUpperCase() === 'GET') {
       response = await axios.get(url, axiosConfig);
     } else {
       response = await axios.post(url, options.data, axiosConfig);
     }
-    
-    // Log response details
-    console.log(`Response from ${url}:`, response.data);
-    console.log('Response headers:', response.headers);
-    
+
     // Handle response
     return response.data;
   } catch (error: any) {
-    console.error(`API call error:`, error);
-    
-    // Enhanced error logging
-    if (error.response) {
-      console.error('Error response status:', error.response.status);
-      console.error('Error response headers:', error.response.headers);
-      console.error('Error response data:', error.response.data);
-    } else if (error.request) {
-      console.error('Error request:', error.request._response || error.request);
-    }
     
     // Check if the error is an Axios error with a response
     if (error.response) {
@@ -432,17 +458,13 @@ const getCurrentLanguage = () => {
 export const fetchCartData = async (): Promise<ApiResponse<any>> => {
   try {
     const currentOcsessid = await getOrCreateOCSESSID();
-    console.log(`Using OCSESSID for cart fetch: ${currentOcsessid}`);
     
     // Get current language for API call
     const language = getCurrentLanguage();
-    console.log(`Fetching cart with language: ${language}`);
     
     // Construct URL with language parameter using proper URLSearchParams
     let url = `${API_BASE_URL}${API_ENDPOINTS.cart}`;
     url = appendLanguageParam(url);
-    console.log(`Fetching cart data from: ${url}`);
-    console.log(`Language parameter: ${language}, URL contains 'language=ar': ${url.includes('language=ar')}`);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -453,13 +475,8 @@ export const fetchCartData = async (): Promise<ApiResponse<any>> => {
       }
     });
     
-    // Log response status and headers for debugging
-    console.log('Cart response status:', response.status);
-    console.log('Cart response headers:', JSON.stringify(response.headers));
-    
     // Get response text instead of json to handle mixed content
     const responseText = await response.text();
-    console.log('Cart raw response:', responseText);
     
     // Parse JSON from the response text
     let jsonData;
@@ -477,10 +494,8 @@ export const fetchCartData = async (): Promise<ApiResponse<any>> => {
         jsonData = JSON.parse(responseText);
       }
       
-      console.log('Cart parsed JSON:', jsonData);
       return jsonData;
     } catch (e) {
-      console.warn('Error parsing cart response, returning empty cart:', e);
       return { 
         success: 1, 
         error: [],
@@ -490,7 +505,6 @@ export const fetchCartData = async (): Promise<ApiResponse<any>> => {
   } catch (error: any) {
     // Network or connection errors - handle gracefully
     if (error.message === 'Network request failed' || error.message === 'Failed to fetch') {
-      console.log('Cart network error, returning empty cart:', error.message);
       return { 
         success: 1, 
         error: [],
@@ -498,7 +512,6 @@ export const fetchCartData = async (): Promise<ApiResponse<any>> => {
       };
     }
     
-    console.warn('Cart fetch error:', error.message);
     return { 
       success: 0, 
       error: [error.message || 'Failed to fetch cart'],
@@ -511,7 +524,6 @@ export const fetchCartData = async (): Promise<ApiResponse<any>> => {
 export const addToCart = async (productId: string, quantity: number): Promise<ApiResponse<any>> => {
   try {
     const currentOcsessid = await getOrCreateOCSESSID();
-    console.log(`Using OCSESSID for add to cart: ${currentOcsessid}`);
     
     // Get current language for API call
     const language = getCurrentLanguage();
@@ -519,7 +531,6 @@ export const addToCart = async (productId: string, quantity: number): Promise<Ap
     // Construct URL with language parameter
     let url = `${API_BASE_URL}${API_ENDPOINTS.addToCart}`;
     url = appendLanguageParam(url);
-    console.log(`Adding to cart: ${url}`);
     
     // Ensure quantity is a positive integer
     const validQuantity = Math.max(1, Math.floor(quantity));
@@ -540,7 +551,6 @@ export const addToCart = async (productId: string, quantity: number): Promise<Ap
     
     // Get response text
     const responseText = await response.text();
-    console.log('Add to cart raw response:', responseText);
     
     // Parse JSON from the response text
     let jsonData;
@@ -556,8 +566,6 @@ export const addToCart = async (productId: string, quantity: number): Promise<Ap
       } else {
         jsonData = JSON.parse(responseText);
       }
-      
-      console.log('Add to cart parsed JSON:', jsonData);
       
       // Validate response structure
       if (jsonData && typeof jsonData === 'object') {
@@ -584,11 +592,9 @@ export const addToCart = async (productId: string, quantity: number): Promise<Ap
       // If we get here, the response structure is unexpected
       throw new Error('Unexpected response structure from add to cart endpoint');
     } catch (e) {
-      console.error('Error parsing add to cart response:', e);
       throw new Error('Failed to parse add to cart response');
     }
   } catch (error: any) {
-    console.error('Add to cart error:', error);
     return { 
       success: 0, 
       error: [error.message || 'Failed to add to cart'],
@@ -632,11 +638,8 @@ export async function getActiveCurrencyCode(): Promise<string | null> {
 export const updateCartQuantity = async (cartId: string, quantity: number): Promise<ApiResponse<any>> => {
   try {
     const currentOcsessid = await getOrCreateOCSESSID();
-    console.log(`Using OCSESSID for update cart: ${currentOcsessid}`);
     
     const url = appendLanguageParam(`${API_BASE_URL}${API_ENDPOINTS.updateCart}`);
-    console.log(`Updating cart quantity: ${url}`);
-    console.log(`Update cart payload:`, {cart_id: cartId, quantity: quantity.toString()});
     
     // Create form data
     const formData = new URLSearchParams();
@@ -656,7 +659,6 @@ export const updateCartQuantity = async (cartId: string, quantity: number): Prom
     
     // Get response text
     const responseText = await response.text();
-    console.log('Update cart raw response:', responseText);
     
     // Parse JSON from the response text
     let jsonData;
@@ -672,8 +674,6 @@ export const updateCartQuantity = async (cartId: string, quantity: number): Prom
       } else {
         jsonData = JSON.parse(responseText);
       }
-      
-      console.log('Update cart parsed JSON:', jsonData);
       
       // Ensure proper response format
       if (jsonData && typeof jsonData === 'object') {
@@ -700,11 +700,9 @@ export const updateCartQuantity = async (cartId: string, quantity: number): Prom
       // If we get here, the response structure is unexpected
       throw new Error('Unexpected response structure from update cart endpoint');
     } catch (e) {
-      console.error('Error parsing update cart response:', e);
       throw new Error('Failed to parse update cart response');
     }
   } catch (error: any) {
-    console.error('Update cart error:', error);
     return { 
       success: 0, 
       error: [error.message || 'Failed to update cart'],
@@ -716,11 +714,8 @@ export const updateCartQuantity = async (cartId: string, quantity: number): Prom
 export const removeCartItem = async (cartId: string): Promise<ApiResponse<any>> => {
   try {
     const currentOcsessid = await getOrCreateOCSESSID();
-    console.log(`Using OCSESSID for remove cart item: ${currentOcsessid}`);
     
     const url = appendLanguageParam(`${API_BASE_URL}${API_ENDPOINTS.removeFromCart}`);
-    console.log(`Removing cart item: ${url}`);
-    console.log(`Remove cart payload:`, {cart_id: cartId});
     
     // Create form data
     const formData = new URLSearchParams();
@@ -739,7 +734,6 @@ export const removeCartItem = async (cartId: string): Promise<ApiResponse<any>> 
     
     // Get response text
     const responseText = await response.text();
-    console.log('Remove cart item raw response:', responseText);
     
     // Parse JSON from the response text
     let jsonData;
@@ -756,14 +750,11 @@ export const removeCartItem = async (cartId: string): Promise<ApiResponse<any>> 
         jsonData = JSON.parse(responseText);
       }
       
-      console.log('Remove cart item parsed JSON:', jsonData);
       return jsonData;
     } catch (e) {
-      console.error('Error parsing remove cart item response:', e);
       throw new Error('Failed to parse remove cart item response');
     }
   } catch (error: any) {
-    console.error('Remove cart item error:', error);
     return { 
       success: 0, 
       error: [error.message || 'Failed to remove cart item'],
@@ -775,10 +766,8 @@ export const removeCartItem = async (cartId: string): Promise<ApiResponse<any>> 
 export const emptyCart = async (): Promise<ApiResponse<any>> => {
   try {
     const currentOcsessid = await getOrCreateOCSESSID();
-    console.log(`Using OCSESSID for empty cart: ${currentOcsessid}`);
     
     const url = appendLanguageParam(`${API_BASE_URL}${API_ENDPOINTS.emptyCart}`);
-    console.log(`Emptying cart: ${url}`);
     
     const response = await fetch(url, {
       method: 'DELETE',
@@ -790,7 +779,6 @@ export const emptyCart = async (): Promise<ApiResponse<any>> => {
     });
     // Get response text
     const responseText = await response.text();
-    console.log('Empty cart raw response:', responseText);
     
     // Parse JSON from the response text
     let jsonData;
@@ -807,14 +795,11 @@ export const emptyCart = async (): Promise<ApiResponse<any>> => {
         jsonData = JSON.parse(responseText);
       }
       
-      console.log('Empty cart parsed JSON:', jsonData);
       return jsonData;
     } catch (e) {
-      console.error('Error parsing empty cart response:', e);
       throw new Error('Failed to parse empty cart response');
     }
   } catch (error: any) {
-    console.error('Empty cart error:', error);
     return { 
       success: 0, 
       error: [error.message || 'Failed to empty cart'],

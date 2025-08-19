@@ -5,6 +5,7 @@ import { useAuthStore } from '@store/auth-store';
 import { useLanguageStore } from '@store/language-store';
 import { theme } from '@theme';
 import { API_ENDPOINTS, makeApiCall } from '@utils/api-config';
+import { getTextAlign } from '@utils/rtlStyles';
 import { Stack, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -102,15 +103,15 @@ export default function MyDetailsScreen() {
 
   const handleDeleteData = async () => {
     Alert.alert(
-      'Delete Data',
-      'You will be redirected to delete your account data. When you return to the app, you will be logged out.',
+      t('account.deleteData'),
+      t('account.deleteDataMessage'),
       [
         {
-          text: 'Cancel',
+          text: t('common.cancel'),
           style: 'cancel'
         },
         {
-          text: 'Continue',
+          text: t('account.continue'),
           style: 'destructive',
           onPress: () => {
             setHasLeftForDeletion(true);
@@ -281,6 +282,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.md,
     color: theme.colors.black,
     backgroundColor: theme.colors.white,
+    textAlign: getTextAlign(),
   },
   editButton: {
     backgroundColor: theme.colors.black,

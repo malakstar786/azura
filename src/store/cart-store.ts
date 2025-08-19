@@ -68,15 +68,12 @@ export const useCartStore = create<CartStore>()(
       getCart: async () => {
         try {
           set({ isLoading: true, error: null });
-          console.log('Fetching cart data...');
 
           const response = await fetchCartData();
-          console.log('Cart response:', response);
 
           if (response.success === 1) {
             // Handle case where the response data is null (empty cart)
             if (!response.data) {
-              console.log('Cart is empty (null data)');
               set({ 
                 items: [],
                 total: 0,
@@ -87,7 +84,6 @@ export const useCartStore = create<CartStore>()(
             
             // Handle case where data contains total_product_count
             if (response.data && typeof response.data === 'object' && 'total_product_count' in response.data) {
-              console.log(`Cart has ${response.data.total_product_count} items count`);
               
               if (!response.data.total_product_count) {
                 set({
@@ -102,7 +98,6 @@ export const useCartStore = create<CartStore>()(
             // Handle case where data contains products array
             if (response.data && typeof response.data === 'object' && 'products' in response.data) {
               const products = response.data.products || [];
-              console.log(`Cart has ${products.length} products`);
               
               set({
                 items: products,
@@ -122,7 +117,6 @@ export const useCartStore = create<CartStore>()(
             }
 
             // Fallback for unexpected response format
-            console.warn('Unexpected cart response format:', response.data);
             set({ 
               items: [],
               total: 0,
@@ -148,7 +142,6 @@ export const useCartStore = create<CartStore>()(
       addToCart: async (productId: string, quantity: number = 1) => {
         try {
           set({ isLoading: true, error: null });
-          console.log(`Adding product ${productId} to cart, quantity: ${quantity}`);
           
           const response = await apiAddToCart(productId, quantity);
           
@@ -166,7 +159,6 @@ export const useCartStore = create<CartStore>()(
             );
           }
         } catch (error: any) {
-          console.error('Error adding to cart:', error);
           set({ 
             isLoading: false, 
             error: error.message || 'Failed to add product to cart'
@@ -182,7 +174,6 @@ export const useCartStore = create<CartStore>()(
       removeItem: async (cartId: string) => {
         try {
           set({ isLoading: true, error: null });
-          console.log(`Removing item ${cartId} from cart`);
           
           const response = await apiRemoveCartItem(cartId);
           
@@ -192,7 +183,6 @@ export const useCartStore = create<CartStore>()(
               const currentItems = get().items;
               if (currentItems.length === 1) {
                 // If we're removing the last item, just set to empty directly rather than fetching
-                console.log('Removing last item from cart, setting to empty');
                 set({ 
                   items: [],
                   total: 0,
@@ -209,7 +199,6 @@ export const useCartStore = create<CartStore>()(
                 duration: 2000
               });
             } catch (fetchError) {
-              console.error('Error refreshing cart after item removal:', fetchError);
               // If getCart fails, ensure we update the UI anyway by removing the item locally
               const remainingItems = get().items.filter(item => item.cart_id !== cartId);
               set({
@@ -233,7 +222,6 @@ export const useCartStore = create<CartStore>()(
             );
           }
         } catch (error: any) {
-          console.error('Error removing from cart:', error);
           set({ 
             isLoading: false, 
             error: error.message || 'Failed to remove product from cart'
@@ -249,7 +237,6 @@ export const useCartStore = create<CartStore>()(
       clearCart: async () => {
         try {
           set({ isLoading: true, error: null });
-          console.log('Clearing cart');
           
           const response = await apiEmptyCart();
           
@@ -270,7 +257,6 @@ export const useCartStore = create<CartStore>()(
             );
           }
         } catch (error: any) {
-          console.error('Error clearing cart:', error);
           set({ 
             isLoading: false, 
             error: error.message || 'Failed to clear cart'
@@ -291,10 +277,8 @@ export const useCartStore = create<CartStore>()(
           }
           
           set({ isLoading: true, error: null });
-          console.log(`Updating quantity for item ${cartId} to ${newQuantity}`);
           
           const response = await apiUpdateCartQuantity(cartId, newQuantity);
-          console.log('Update quantity API response:', response);
           
           if (response.success === 1) {
             // Refresh cart after successful update
@@ -310,7 +294,6 @@ export const useCartStore = create<CartStore>()(
               ? response.error[0] 
               : (typeof response.error === 'string' ? response.error : 'Failed to update cart');
             
-            console.log('Update quantity API error:', errorMessage);
             
             Toast.show(errorMessage, {
               type: 'error',
@@ -322,7 +305,6 @@ export const useCartStore = create<CartStore>()(
             set({ isLoading: false });
           }
         } catch (error: any) {
-          console.error('Error updating cart quantity:', error);
           set({ 
             isLoading: false, 
             error: error.message || 'Failed to update cart'
@@ -339,20 +321,12 @@ export const useCartStore = create<CartStore>()(
         const item = get().items.find(i => i.cart_id === cartId);
         if (!item) return;
         
-        console.log('INCREMENT - Item details:', {
-          cart_id: cartId,
-          name: item.name,
-          current_quantity: item.quantity,
-          stock: item.stock,
-          minimum: item.minimum,
-          maximum: item.maximum
-        });
+        
         
         const currentQuantity = typeof item.quantity === 'string' 
           ? parseInt(item.quantity, 10) 
           : (typeof item.quantity === 'number' ? item.quantity : 0);
           
-        console.log(`Incrementing quantity for ${cartId} from ${currentQuantity} to ${currentQuantity + 1}`);
         await get().updateQuantity(cartId, currentQuantity + 1);
       },
       
@@ -360,14 +334,7 @@ export const useCartStore = create<CartStore>()(
         const item = get().items.find(i => i.cart_id === cartId);
         if (!item) return;
         
-        console.log('DECREMENT - Item details:', {
-          cart_id: cartId,
-          name: item.name,
-          current_quantity: item.quantity,
-          stock: item.stock,
-          minimum: item.minimum,
-          maximum: item.maximum
-        });
+        
         
         const currentQuantity = typeof item.quantity === 'string' 
           ? parseInt(item.quantity, 10) 
@@ -383,7 +350,6 @@ export const useCartStore = create<CartStore>()(
           return;
         }
         
-        console.log(`Decrementing quantity for ${cartId} from ${currentQuantity} to ${currentQuantity - 1}`);
         await get().updateQuantity(cartId, currentQuantity - 1);
       },
       

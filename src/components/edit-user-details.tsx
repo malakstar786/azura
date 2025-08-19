@@ -1,18 +1,21 @@
 import { useTranslation } from '@/i18n/useTranslation';
 import { theme } from '@/theme';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@store/auth-store';
-import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
+import { useLanguageStore } from '@store/language-store';
+import { getTextAlign } from '@utils/rtlStyles';
+import { Stack } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export interface EditUserDetailsProps {
@@ -38,6 +41,7 @@ export default function EditUserDetails({
 }: EditUserDetailsProps) {
   const { user, updateUser } = useAuthStore();
   const { t } = useTranslation();
+  const { isRTL } = useLanguageStore();
   const [isLoading, setIsLoading] = useState(false);
   
   // Initialize form data with provided userData or fallback to user from store
@@ -129,166 +133,190 @@ export default function EditUserDetails({
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={100}
-    >
-      <ScrollView>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('userDetails.title')}</Text>
-          <Text style={styles.subtitle}>{t('userDetails.subtitle')}</Text>
-        </View>
+    <View style={styles.container}>
+      <Stack.Screen 
+        options={{ 
+          title: '',
+          headerShadowVisible: false,
+          headerLeft: () => (
+            <TouchableOpacity onPress={onCancel}>
+              <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={24} color={theme.colors.black} />
+            </TouchableOpacity>
+          ),
+        }} 
+      />
+      
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={100}
+      >
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={styles.title}>{t('details.editTitle')}</Text>
+          <View style={styles.divider} />
+          
+          <View style={styles.fieldsContainer}>
+            <View style={styles.fieldWrapper}>
+              <Text style={styles.fieldLabel}>{t('details.firstName')}</Text>
+              <TextInput
+                style={[styles.textInput, errors.firstname ? styles.inputError : null]}
+                value={formData.firstname}
+                onChangeText={(text) => setFormData({...formData, firstname: text})}
+                placeholder={t('details.firstName')}
+                autoCapitalize="words"
+                textAlign={getTextAlign()}
+                placeholderTextColor={theme.colors.mediumGray}
+                editable={!isLoading}
+              />
+              {errors.firstname ? <Text style={styles.errorText}>{errors.firstname}</Text> : null}
+            </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('userDetails.firstName')}</Text>
-            <TextInput
-              style={[styles.input, errors.firstname ? styles.inputError : null]}
-              value={formData.firstname}
-              onChangeText={(text) => setFormData({...formData, firstname: text})}
-              placeholder={t('userDetails.firstName')}
-              autoCapitalize="words"
-            />
-            {errors.firstname ? <Text style={styles.errorText}>{errors.firstname}</Text> : null}
+            <View style={styles.fieldWrapper}>
+              <Text style={styles.fieldLabel}>{t('details.lastName')}</Text>
+              <TextInput
+                style={[styles.textInput, errors.lastname ? styles.inputError : null]}
+                value={formData.lastname}
+                onChangeText={(text) => setFormData({...formData, lastname: text})}
+                placeholder={t('details.lastName')}
+                autoCapitalize="words"
+                textAlign={getTextAlign()}
+                placeholderTextColor={theme.colors.mediumGray}
+                editable={!isLoading}
+              />
+              {errors.lastname ? <Text style={styles.errorText}>{errors.lastname}</Text> : null}
+            </View>
+
+            <View style={styles.fieldWrapper}>
+              <Text style={styles.fieldLabel}>{t('details.email')}</Text>
+              <TextInput
+                style={[styles.textInput, errors.email ? styles.inputError : null]}
+                value={formData.email}
+                onChangeText={(text) => setFormData({...formData, email: text})}
+                placeholder={t('details.email')}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                textAlign={getTextAlign()}
+                placeholderTextColor={theme.colors.mediumGray}
+                editable={!isLoading}
+              />
+              {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+            </View>
+
+            <View style={styles.fieldWrapper}>
+              <Text style={styles.fieldLabel}>{t('details.mobile')}</Text>
+              <TextInput
+                style={[styles.textInput, errors.telephone ? styles.inputError : null]}
+                value={formData.telephone}
+                onChangeText={(text) => setFormData({...formData, telephone: text})}
+                placeholder={t('details.mobile')}
+                keyboardType="phone-pad"
+                textAlign={getTextAlign()}
+                placeholderTextColor={theme.colors.mediumGray}
+                editable={!isLoading}
+              />
+              {errors.telephone ? <Text style={styles.errorText}>{errors.telephone}</Text> : null}
+            </View>
           </View>
+          
+          <TouchableOpacity 
+            style={styles.saveButton}
+            onPress={handleSubmit}
+            disabled={isLoading}
+          >
+            <Text style={styles.saveButtonText}>
+              {isLoading ? t('common.loading') : t('details.saveButton')}
+            </Text>
+          </TouchableOpacity>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('userDetails.lastName')}</Text>
-            <TextInput
-              style={[styles.input, errors.lastname ? styles.inputError : null]}
-              value={formData.lastname}
-              onChangeText={(text) => setFormData({...formData, lastname: text})}
-              placeholder={t('userDetails.lastName')}
-              autoCapitalize="words"
-            />
-            {errors.lastname ? <Text style={styles.errorText}>{errors.lastname}</Text> : null}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('userDetails.email')}</Text>
-            <TextInput
-              style={[styles.input, errors.email ? styles.inputError : null]}
-              value={formData.email}
-              onChangeText={(text) => setFormData({...formData, email: text})}
-              placeholder={t('userDetails.email')}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>{t('userDetails.mobile')}</Text>
-            <TextInput
-              style={[styles.input, errors.telephone ? styles.inputError : null]}
-              value={formData.telephone}
-              onChangeText={(text) => setFormData({...formData, telephone: text})}
-              placeholder={t('userDetails.mobile')}
-              keyboardType="phone-pad"
-            />
-            {errors.telephone ? <Text style={styles.errorText}>{errors.telephone}</Text> : null}
-          </View>
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
+          <TouchableOpacity 
             style={styles.cancelButton}
             onPress={onCancel}
             disabled={isLoading}
           >
             <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSubmit}
-            disabled={isLoading}
-          >
-            <Text style={styles.saveButtonText}>
-              {isLoading ? t('common.loading') : t('userDetails.save')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.white,
   },
-  header: {
-    padding: 20,
+  content: {
+    flex: 1,
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.md,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontSize: theme.typography.sizes.xxxl,
+    fontWeight: theme.typography.weights.bold as any,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
   },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    marginBottom: 20,
+  divider: {
+    height: 2,
+    backgroundColor: theme.colors.black,
+    marginBottom: theme.spacing.lg,
   },
-  form: {
-    padding: 20,
+  fieldsContainer: {
+    marginBottom: theme.spacing.lg,
   },
-  inputGroup: {
-    marginBottom: 20,
+  fieldWrapper: {
+    marginBottom: theme.spacing.lg,
   },
-  label: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    marginBottom: 8,
+  fieldLabel: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.sm,
+    fontWeight: theme.typography.weights.bold as any,
   },
-  input: {
+  textInput: {
     borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    borderRadius: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 16,
-    fontSize: 16,
+    borderColor: theme.colors.black,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.black,
+    backgroundColor: theme.colors.white,
     textAlign: getTextAlign(),
   },
   inputError: {
-    borderColor: theme.colors.error,
+    borderColor: theme.colors.red,
   },
   errorText: {
-    color: theme.colors.error,
-    fontSize: 12,
-    marginTop: 4,
-  },
-  buttonContainer: {
-    flexDirection: getFlexDirection('row'),
-    justifyContent: 'space-between',
-    padding: 20,
-    marginTop: 10,
-    marginBottom: 30,
-  },
-  cancelButton: {
-    borderWidth: 1,
-    borderColor: theme.colors.black,
-    borderRadius: 4,
-    paddingVertical: 16,
-    width: '48%',
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    color: theme.colors.black,
+    color: theme.colors.red,
+    fontSize: theme.typography.sizes.sm,
+    marginTop: theme.spacing.xs,
   },
   saveButton: {
-    backgroundColor: theme.colors.buttonPrimary,
-    borderRadius: 4,
-    paddingVertical: 16,
-    width: '48%',
+    backgroundColor: theme.colors.black,
+    marginTop: theme.spacing.sm,
+    marginBottom: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.spacing.sm,
     alignItems: 'center',
   },
   saveButtonText: {
-    fontSize: 16,
     color: theme.colors.white,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold as any,
+  },
+  cancelButton: {
+    backgroundColor: theme.colors.white,
+    borderWidth: 1,
+    borderColor: theme.colors.black,
+    marginBottom: theme.spacing.xl,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.spacing.sm,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: theme.colors.black,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold as any,
   },
 }); 

@@ -28,7 +28,6 @@ export const useOrderStore = create<OrderStore>((set) => ({
   fetchOrders: async () => {
     try {
       set({ isLoading: true, error: null });
-      console.log('🔍 ORDER STORE: Fetching order history...');
 
       // Check if user is authenticated first
       const { useAuthStore } = await import('@store/auth-store');
@@ -44,20 +43,11 @@ export const useOrderStore = create<OrderStore>((set) => ({
         return;
       }
 
-      console.log('👤 ORDER STORE: Fetching orders for user:', {
-        customer_id: user.customer_id,
-        email: user.email,
-        name: `${user.firstname} ${user.lastname}`
-      });
-
       const response = await makeApiCall(API_ENDPOINTS.orderHistory, {
         method: 'GET'
       });
 
-      console.log('📦 ORDER STORE: Raw order history response:', JSON.stringify(response, null, 2));
-
       if (response.success === 1 && Array.isArray(response.data)) {
-        console.log(`📊 ORDER STORE: Received ${response.data.length} orders from API`);
 
         // No client-side filtering. Show exactly what the backend returns.
         const enhancedOrders = response.data.map((order: Order) => ({
@@ -69,7 +59,6 @@ export const useOrderStore = create<OrderStore>((set) => ({
 
         set({ orders: enhancedOrders, isLoading: false });
       } else {
-        console.warn('❌ ORDER STORE: No orders received or invalid format:', response);
         set({ 
           orders: [], 
           isLoading: false,

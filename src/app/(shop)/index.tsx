@@ -9,7 +9,7 @@ import { getFlexDirection } from '@utils/rtlStyles';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, FlexAlignType, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -54,27 +54,6 @@ interface ServiceBlock {
   }[];
 }
 
-interface SliderResponse {
-  success: number;
-  error: string[];
-  data: {
-    ishiservices: SliderBlock[];
-  };
-}
-
-interface FeaturesResponse {
-  success: number;
-  error: string[];
-  data: FeaturesBlock;
-}
-
-// Update the category mapping
-const CATEGORY_MAP = {
-  'nail-care': { id: '20', name: 'Nail Care' },
-  'perfumes': { id: '57', name: 'Fragrance' },
-  'makeup': { id: '18', name: 'Makeup' }
-};
-
 export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [sliderData, setSliderData] = useState<SliderBlock | null>(null);
@@ -95,7 +74,7 @@ export default function HomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const router = useRouter();
-  const { currentLanguage, lastUpdated } = useLanguageStore();
+  const { currentLanguage, lastUpdated, isRTL } = useLanguageStore();
   const { t } = useTranslation();
 
   const getErrorMessage = (error: any) => {
@@ -178,82 +157,15 @@ export default function HomeScreen() {
     );
   }
 
-  const getFlexAlignment = (alignment: string): FlexAlignType => {
-    switch (alignment) {
-      case 'left': return 'flex-start';
-      case 'right': return 'flex-end';
-      default: return 'center';
-    }
-  };
-
-  const renderFeatureBlock = (block: FeaturesBlock, category: string) => (
-    <View style={styles.section}>
-      <Image
-        source={{ uri: block.image }}
-        style={styles.sectionImage}
-        resizeMode="cover"
-      />
-      <LinearGradient
-        colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.5)']}
-        style={styles.overlay}
-      >
-        <View style={[
-          styles.contentContainer,
-          { alignItems: block.text_align === 'left' ? 'flex-start' : 'center' }
-        ]}>
-          <Text style={[
-            styles.title,
-            { 
-              color: '#fff',
-              textAlign: block.text_align as any,
-              marginBottom: block.subtitle ? 12 : 20
-            }
-          ]}>
-            {block.heading}
-          </Text>
-          {block.subtitle && (
-            <Text style={[
-              styles.subtitle,
-              { 
-                color: '#fff',
-                textAlign: block.text_align as any
-              }
-            ]}>
-              {block.subtitle}
-            </Text>
-          )}
-          {block.desc && (
-            <Text style={[
-              styles.description,
-              { 
-                color: '#fff',
-                textAlign: block.text_align as any
-              }
-            ]}>
-              {block.desc}
-            </Text>
-          )}
-          {category !== 'makeup' && block.btntext && (
-            <TouchableOpacity 
-              style={styles.exploreButton}
-              onPress={() => handleExplorePress(category)}
-            >
-              <Text style={styles.exploreButtonText}>
-                {block.btntext}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </LinearGradient>
-    </View>
-  );
-
   return (
     <ScrollView style={styles.container} bounces={false}>
       <View style={styles.header}>
         <TouchableOpacity 
           onPress={() => setIsDrawerVisible(true)}
-          style={styles.menuButton}
+          style={[
+            styles.menuButton,
+            isRTL ? { right: 20 } : { left: 20 }
+          ]}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Ionicons name="menu" size={24} color={theme.colors.white} />
@@ -600,7 +512,6 @@ const styles = StyleSheet.create({
   },
   menuButton: {
     position: 'absolute',
-    left: 20,
     top: theme.spacing.xl,
   },
 });

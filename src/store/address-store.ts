@@ -115,11 +115,12 @@ export const useAddressStore = create<AddressStore>()(
         set({ isLoading: true, error: null });
 
         try {
+          
           // Check if user is authenticated first
           const { isAuthenticated } = useAuthStore.getState();
           if (!isAuthenticated) {
-            console.log('User not authenticated, skipping address fetch');
             set({ addresses: [], isLoading: false });
+            console.log('[AddressStore] fetchAddresses -> user not authenticated');
             return;
           }
 
@@ -127,7 +128,6 @@ export const useAddressStore = create<AddressStore>()(
             method: 'GET'
           });
           
-          console.log('Raw addresses API response:', response);
           
           // Handle authentication errors gracefully
           if (response.success === 0 && response.error && 
@@ -162,12 +162,12 @@ export const useAddressStore = create<AddressStore>()(
               };
             });
 
-            console.log('Converted UI addresses:', uiAddresses);
             // Reverse the array so most recent addresses appear first
             set({ addresses: uiAddresses.reverse(), isLoading: false });
+            
           } else {
-            console.warn('No addresses received or invalid format:', response);
             set({ addresses: [], isLoading: false });
+            
           }
         } catch (error: any) {
           console.error('Error fetching addresses:', error);
@@ -180,174 +180,105 @@ export const useAddressStore = create<AddressStore>()(
       },
       
       addAddress: async (address: Omit<Address, 'id'> & { country_id?: string; zone_id?: string }) => {
+        set({ isLoading: true, error: null });
         try {
-          set({ isLoading: true, error: null });
+          const { user } = useAuthStore.getState();
 
-          // Create form data for the API (based on test results, this endpoint works)
-          const formData = new FormData();
-          
-          // Add required fields
-          formData.append('firstname', address.firstName);
-          formData.append('lastname', address.lastName);
-          formData.append('telephone', address.phone);
-          formData.append('company', ''); // Required empty field
-          if (address.country_id) formData.append('country_id', address.country_id);
-          if (address.zone_id) formData.append('zone_id', address.zone_id);
-          if (address.city) formData.append('city', address.city);
-          formData.append('postcode', ''); // Required empty field
-          
-          // Format address_1 with block, street, and house number
-          const address1 = `Block ${address.block}, Street ${address.street}, House/Building ${address.houseNumber}${address.apartmentNumber ? ', Apt ' + address.apartmentNumber : ''}`;
-          formData.append('address_1', address1);
-          
-          // Add additional details if any
-          formData.append('address_2', address.additionalDetails || '');
-          
-          // Add custom fields
-          formData.append('custom_field[30]', address.block);
-          formData.append('custom_field[31]', address.street);
-          formData.append('custom_field[32]', address.houseNumber);
-          formData.append('custom_field[33]', address.apartmentNumber || '');
-          formData.append('custom_field[35]', address.avenue || '');
-          
-          // Add default flag
-          formData.append('default', address.isDefault ? '1' : '0');
-
-          console.log('Adding new address with data:', {
+          // Build JSON payload per payment address API
+          const payload: any = {
             firstname: address.firstName,
-            lastname: address.lastName,
-            city: address.city,
-            // zone_id removed from logs to avoid implying defaults
-            address_1: address1,
-            custom_fields: {
-              30: address.block,
-              31: address.street,
-              32: address.houseNumber,
-              33: address.apartmentNumber
+            lastname: address.lastName || '',
+            email: user?.email || '',
+            telephone: address.phone || '',
+            country_id: address.country_id || '',
+            city: address.city || '',
+            zone_id: address.zone_id || '',
+            address_2: address.additionalDetails || '',
+            custom_field: {
+              '30': address.block,
+              '31': address.street,
+              '32': address.houseNumber,
+              '33': address.apartmentNumber || '',
+              '35': address.avenue || '',
             }
-          });
+          };
 
-          const response = await makeApiCall(API_ENDPOINTS.editAddress, {
+          
+          const response = await makeApiCall(API_ENDPOINTS.paymentAddressSave, {
             method: 'POST',
-            data: formData
+            data: payload
           });
-
-          console.log('Add address API response:', response);
-
-          // The API returns HTML errors but still creates the address
-          // So we'll refresh the addresses list and show success
-          await get().fetchAddresses();
-          set({ isLoading: false });
-          Alert.alert('Success', 'Address added successfully');
           
-        } catch (error: any) {
-          console.error('Error adding address:', error);
-          
-          // Even if there's an error, try to refresh addresses as the API might have worked
-          try {
+
+          if (response && (response as any).success === 1) {
             await get().fetchAddresses();
             set({ isLoading: false });
             Alert.alert('Success', 'Address added successfully');
-          } catch (refreshError) {
-            const errorMessage = error.message || 'Failed to add address';
-            set({ 
-              isLoading: false, 
-              error: errorMessage 
-            });
-            Alert.alert('Error', errorMessage);
-            throw error;
+            return;
           }
+
+          const errorMessage = Array.isArray((response as any)?.error)
+            ? (response as any).error[0]
+            : (response as any)?.error || 'Failed to add address';
+          throw new Error(errorMessage);
+        } catch (error: any) {
+          
+          const message = error.message || 'Failed to add address';
+          set({ isLoading: false, error: message });
+          Alert.alert('Error', message);
+          throw error;
         }
       },
       
       updateAddress: async (id: string, address: Omit<Address, 'id'> & { country_id?: string; zone_id?: string }) => {
+        set({ isLoading: true, error: null });
         try {
-          set({ isLoading: true, error: null });
-
-          // Create form data for the API
           const formData = new FormData();
-          
-          // For existing addresses, always include address_id
-          // This is REQUIRED for updates
           formData.append('address_id', id);
-          
-          // Add required fields
           formData.append('firstname', address.firstName);
-          formData.append('lastname', address.lastName);
-          formData.append('telephone', address.phone);
-          formData.append('company', ''); // Required empty field
+          formData.append('lastname', address.lastName || '');
+          formData.append('telephone', address.phone || '');
           if (address.country_id) formData.append('country_id', address.country_id);
           if (address.zone_id) formData.append('zone_id', address.zone_id);
           if (address.city) formData.append('city', address.city);
-          formData.append('postcode', ''); // Required empty field
-          
-          // Format address_1 with block, street, and house number
-          const address1 = `Block ${address.block}, Street ${address.street}, House/Building ${address.houseNumber}${address.apartmentNumber ? ', Apt ' + address.apartmentNumber : ''}`;
-          formData.append('address_1', address1);
-          
-          // Add additional details if any
           formData.append('address_2', address.additionalDetails || '');
-          
-          // Add custom fields
           formData.append('custom_field[30]', address.block);
           formData.append('custom_field[31]', address.street);
           formData.append('custom_field[32]', address.houseNumber);
           formData.append('custom_field[33]', address.apartmentNumber || '');
-          
-          // Add default flag
           formData.append('default', address.isDefault ? '1' : '0');
 
-          console.log('Updating address with data:', {
-            address_id: id,
-            firstname: address.firstName,
-            lastname: address.lastName,
-            city: address.city,
-            // zone_id removed from logs to avoid implying defaults
-            address_1: address1,
-            custom_fields: {
-              30: address.block,
-              31: address.street,
-              32: address.houseNumber,
-              33: address.apartmentNumber
-            }
-          });
-
+          
           const response = await makeApiCall(API_ENDPOINTS.editAddress, {
             method: 'POST',
             data: formData
           });
-
-          console.log('Update address API response:', response);
-
-          // The API returns HTML errors but still updates the address
-          // So we'll refresh the addresses list and show success
-          await get().fetchAddresses();
-          set({ isLoading: false });
-          Alert.alert('Success', 'Address updated successfully');
           
-        } catch (error: any) {
-          console.error('Error updating address:', error);
-          
-          // Even if there's an error, try to refresh addresses as the API might have worked
-          try {
+
+          if (response && (response as any).success === 1) {
             await get().fetchAddresses();
             set({ isLoading: false });
             Alert.alert('Success', 'Address updated successfully');
-          } catch (refreshError) {
-            const errorMessage = error.message || 'Failed to update address';
-            set({ 
-              isLoading: false, 
-              error: errorMessage 
-            });
-            Alert.alert('Error', errorMessage);
-            throw error;
+            return;
           }
+
+          const errorMessage = Array.isArray((response as any)?.error)
+            ? (response as any).error[0]
+            : (response as any)?.error || 'Failed to update address';
+          throw new Error(errorMessage);
+        } catch (error: any) {
+          
+          const message = error.message || 'Failed to update address';
+          set({ isLoading: false, error: message });
+          Alert.alert('Error', message);
+          throw error;
         }
       },
       
       deleteAddress: async (id: string) => {
         try {
           set({ isLoading: true, error: null });
+          
           
           // Check if user is authenticated
           const { isAuthenticated } = useAuthStore.getState();
@@ -364,6 +295,7 @@ export const useAddressStore = create<AddressStore>()(
             method: 'POST',
             data: formData
           });
+          
           
           if (response.success === 1) {
             // Refresh addresses after deleting

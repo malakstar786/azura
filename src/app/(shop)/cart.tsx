@@ -138,7 +138,6 @@ const CartItemRow = ({
   const quantities = Array.from({ length: 10 }, (_, i) => i + 1);
 
   const handleIncrement = async () => {
-    console.log('Increment button pressed for item:', item.cart_id, 'stock:', item.stock, 'maximum:', item.maximum);
     
     // Only check if we're updating to prevent double-clicks
     if (isUpdating) return;
@@ -154,7 +153,6 @@ const CartItemRow = ({
   };
 
   const handleDecrement = async () => {
-    console.log('Decrement button pressed for item:', item.cart_id, 'quantity:', item.quantity, 'minimum:', item.minimum);
     
     // Only check if we're updating to prevent double-clicks
     if (isUpdating) return;

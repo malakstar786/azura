@@ -3,7 +3,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAddressStore } from '@store/address-store';
 import { useAuthStore } from '@store/auth-store';
 import { theme } from '@theme';
-import { getActiveCountryId } from '@utils/api-config';
 import { Country, Governorate, LocationService, Zone } from '@utils/location-service';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
 import React, { useEffect, useState } from 'react';
@@ -179,11 +178,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
       const uniqueCountries = uniqueBy<Country, string>(countriesData, (c) => c.country_id);
       setCountries(uniqueCountries);
       
-      // Set selected country based on active stored country id
-      const activeCountryId = await getActiveCountryId();
-      const active = uniqueCountries.find((c: Country) => c.country_id === activeCountryId) || null;
-      setSelectedCountry(active);
-      if (active) setFormData((prev) => ({ ...prev, country_id: active.country_id }));
+      // Don't set default country - let user choose
     } catch (error) {
       console.error('Error loading countries:', error);
       Alert.alert(t('common.error'), t('error.serverError'));
@@ -226,20 +221,22 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
 
   const handleCountrySelect = (country: Country) => {
     setSelectedCountry(country);
-    setFormData({ ...formData, country_id: country.country_id, zone_id: '' });
+    setFormData(prev => ({ ...prev, country_id: country.country_id, zone_id: '' }));
     setShowCountryModal(false);
   };
 
   const handleGovernorateSelect = (governorate: Governorate) => {
     setSelectedGovernorate(governorate);
-    setFormData({ ...formData, city: governorate.name });
+    // Server expects city (governorate) context; prefer storing name for display,
+    // but also keep an id hint inside address_1 to aid debug if server needs id
+    setFormData(prev => ({ ...prev, city: governorate.name }));
     loadAreas(governorate.governorate_id);
     setShowGovernorateModal(false);
   };
 
   const handleAreaSelect = (area: Zone) => {
     setSelectedArea(area);
-    setFormData({ ...formData, zone_id: area.zone_id });
+    setFormData(prev => ({ ...prev, zone_id: area.zone_id }));
     setShowAreaModal(false);
   };
 
@@ -288,6 +285,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
     if (!validateForm()) return;
 
     try {
+      
       // Prepare address data for different contexts
       if (context === 'checkout' && customSaveFunction && !formData.address_id) {
         // Get user's email from auth store
@@ -370,7 +368,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
         <View style={styles.dropdownModal}>
-          <View style={styles.dropdownHeader}>
+          <View style={[styles.dropdownHeader, { flexDirection: getFlexDirection('row') }]}>
             <Text style={styles.dropdownTitle}>{title}</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#000" />
@@ -423,7 +421,7 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
     <Modal visible={true} animationType="slide" presentationStyle="pageSheet">
       <SafeAreaView style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { flexDirection: getFlexDirection('row') }]}>
           <TouchableOpacity onPress={onClose} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={theme.colors.black} style={{ transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] }} />
           </TouchableOpacity>
@@ -444,53 +442,45 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
             contentContainerStyle={styles.scrollViewContent}
             keyboardShouldPersistTaps="handled"
           >
-          {/* First & Last Name Fields */}
-          <View style={[styles.rowInputs, I18nManager.isRTL ? { flexDirection: 'row-reverse' } : null]}>
-            <TextInput
-              style={[styles.input, styles.halfInput]}
-              placeholder={t('auth.firstName')}
-              value={formData.firstname}
-              onChangeText={(text) => setFormData({ ...formData, firstname: text })}
-              placeholderTextColor="#999"
-            />
-            <TextInput
-              style={[styles.input, styles.halfInput]}
-              placeholder={t('auth.lastName')}
-              value={formData.lastname}
-              onChangeText={(text) => setFormData({ ...formData, lastname: text })}
-              placeholderTextColor="#999"
-            />
-          </View>
-
-          {/* Phone Field */}
+          {/* First Name Field */}
           <TextInput
             style={styles.input}
-            placeholder={t('address.mobile')}
-            value={formData.phone}
-            onChangeText={(text) => setFormData({ ...formData, phone: text })}
-            keyboardType="phone-pad"
+            placeholder={t('auth.firstName')}
+            value={formData.firstname}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, firstname: text }))}
             placeholderTextColor="#999"
+            textAlign={getTextAlign()}
+          />
+
+          {/* Last Name Field */}
+          <TextInput
+            style={styles.input}
+            placeholder={t('auth.lastName')}
+            value={formData.lastname}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, lastname: text }))}
+            placeholderTextColor="#999"
+            textAlign={getTextAlign()}
           />
 
           {/* Country Dropdown */}
           <TouchableOpacity 
-            style={styles.dropdownInput}
+            style={[styles.dropdownInput, { flexDirection: getFlexDirection('row') }]}
             onPress={() => setShowCountryModal(true)}
           >
-            <Text style={selectedCountry ? styles.inputText : styles.placeholderText}>
+            <Text style={[selectedCountry ? styles.inputText : styles.placeholderText, { textAlign: getTextAlign() }]}>
               {selectedCountry ? selectedCountry.name : t('account.country')}
             </Text>
             <Ionicons name="chevron-down" size={20} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.helperNote}>{t('address.changeCountryNote')}</Text>
+          <Text style={[styles.helperNote, { textAlign: getTextAlign() }]}>{t('address.changeCountryNote')}</Text>
 
           {/* City/Governorate Dropdown */}
           <TouchableOpacity 
-            style={styles.dropdownInput}
+            style={[styles.dropdownInput, { flexDirection: getFlexDirection('row') }]}
             onPress={() => setShowGovernorateModal(true)}
             disabled={!formData.country_id}
           >
-            <Text style={selectedGovernorate ? styles.inputText : styles.placeholderText}>
+            <Text style={[selectedGovernorate ? styles.inputText : styles.placeholderText, { textAlign: getTextAlign() }]}>
               {selectedGovernorate ? selectedGovernorate.name : t('address.governorate')}
             </Text>
             <Ionicons name="chevron-down" size={20} color="#000" />
@@ -498,63 +488,78 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
 
           {/* Area Dropdown */}
           <TouchableOpacity 
-            style={styles.dropdownInput}
+            style={[styles.dropdownInput, { flexDirection: getFlexDirection('row') }]}
             onPress={() => setShowAreaModal(true)}
             disabled={!selectedGovernorate}
           >
-            <Text style={selectedArea ? styles.inputText : styles.placeholderText}>
+            <Text style={[selectedArea ? styles.inputText : styles.placeholderText, { textAlign: getTextAlign() }]}>
               {selectedArea ? selectedArea.name : t('address.area')}
             </Text>
             <Ionicons name="chevron-down" size={20} color="#000" />
           </TouchableOpacity>
 
+         {/* Phone Field */}
+           <TextInput
+            style={styles.input}
+            placeholder={t('address.mobile')}
+            value={formData.phone}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, phone: text }))}
+            keyboardType="phone-pad"
+            placeholderTextColor="#999"
+            textAlign={getTextAlign()}
+          />
+
           {/* Block and Street Row */}
-          <View style={[styles.rowInputs, I18nManager.isRTL ? { flexDirection: 'row-reverse' } : null]}>
+          <View style={[styles.rowInputs, { flexDirection: getFlexDirection('row') }]}>
             <TextInput
               style={[styles.input, styles.halfInput]}
               placeholder={t('address.block')}
               value={formData.custom_field['30']}
-              onChangeText={(text) => setFormData({
-                ...formData,
-                custom_field: { ...formData.custom_field, '30': text }
-              })}
+              onChangeText={(text) => setFormData(prev => ({
+                ...prev,
+                custom_field: { ...prev.custom_field, '30': text }
+              }))}
               placeholderTextColor="#999"
+              textAlign={getTextAlign()}
             />
 
             <TextInput
               style={[styles.input, styles.halfInput]}
               placeholder={t('address.street')}
               value={formData.custom_field['31']}
-              onChangeText={(text) => setFormData({
-                ...formData,
-                custom_field: { ...formData.custom_field, '31': text }
-              })}
+              onChangeText={(text) => setFormData(prev => ({
+                ...prev,
+                custom_field: { ...prev.custom_field, '31': text }
+              }))}
               placeholderTextColor="#999"
+              textAlign={getTextAlign()}
             />
           </View>
 
           {/* House Building and Apartment Row */}
-          <View style={[styles.rowInputs, I18nManager.isRTL ? { flexDirection: 'row-reverse' } : null]}>
+          <View style={[styles.rowInputs, { flexDirection: getFlexDirection('row') }]}>
             <TextInput
               style={[styles.input, styles.halfInput]}
               placeholder={t('address.building')}
               value={formData.custom_field['32']}
-              onChangeText={(text) => setFormData({
-                ...formData,
-                custom_field: { ...formData.custom_field, '32': text }
-              })}
+              onChangeText={(text) => setFormData(prev => ({
+                ...prev,
+                custom_field: { ...prev.custom_field, '32': text }
+              }))}
               placeholderTextColor="#999"
+              textAlign={getTextAlign()}
             />
 
             <TextInput
               style={[styles.input, styles.halfInput]}
               placeholder={t('address.apartment')}
               value={formData.custom_field['33']}
-              onChangeText={(text) => setFormData({
-                ...formData,
-                custom_field: { ...formData.custom_field, '33': text }
-              })}
+              onChangeText={(text) => setFormData(prev => ({
+                ...prev,
+                custom_field: { ...prev.custom_field, '33': text }
+              }))}
               placeholderTextColor="#999"
+              textAlign={getTextAlign()}
             />
           </View>
 
@@ -563,11 +568,12 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
             style={styles.input}
             placeholder={t('address.avenue')}
             value={formData.custom_field['35']}
-            onChangeText={(text) => setFormData({
-              ...formData,
-              custom_field: { ...formData.custom_field, '35': text }
-            })}
+            onChangeText={(text) => setFormData(prev => ({
+              ...prev,
+              custom_field: { ...prev.custom_field, '35': text }
+            }))}
             placeholderTextColor="#999"
+            textAlign={getTextAlign()}
           />
 
           {/* Address Line 2 */}
@@ -575,12 +581,13 @@ export default function ImprovedAddEditAddress({ address, onClose, onAddressUpda
             style={styles.input}
             placeholder={t('address.additionalInfo')}
             value={formData.address_2}
-            onChangeText={(text) => setFormData({ ...formData, address_2: text })}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, address_2: text }))}
             placeholderTextColor="#999"
+            textAlign={getTextAlign()}
           />
 
           {/* Footer Buttons */}
-          <View style={styles.footer}>
+          <View style={[styles.footer, { flexDirection: getFlexDirection('row') }]}>
             <TouchableOpacity 
               style={styles.cancelButton} 
               onPress={onClose}
@@ -644,7 +651,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    flexDirection: getFlexDirection('row'),
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
@@ -682,7 +688,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#000',
     backgroundColor: '#fff',
-    textAlign: getTextAlign(),
   },
   dropdownInput: {
     height: 56,
@@ -691,13 +696,11 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     paddingHorizontal: 16,
     marginBottom: 16,
-    flexDirection: getFlexDirection('row'),
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
   },
   rowInputs: {
-    flexDirection: getFlexDirection('row'),
     justifyContent: 'space-between',
   },
   halfInput: {
@@ -706,21 +709,17 @@ const styles = StyleSheet.create({
   inputText: {
     fontSize: 16,
     color: '#000',
-    textAlign: getTextAlign(),
   },
   placeholderText: {
     fontSize: 16,
     color: '#999',
-    textAlign: getTextAlign(),
   },
   helperNote: {
     fontSize: 12,
     color: theme.colors.mediumGray,
     marginBottom: 12,
-    textAlign: getTextAlign(),
   },
   footer: {
-    flexDirection: getFlexDirection('row'),
     padding: 16,
     gap: 16,
   },
@@ -764,7 +763,6 @@ const styles = StyleSheet.create({
     maxHeight: SCREEN_HEIGHT * 0.7,
   },
   dropdownHeader: {
-    flexDirection: getFlexDirection('row'),
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
