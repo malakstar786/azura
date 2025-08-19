@@ -4,7 +4,7 @@
     "slug": "azura-app",
     "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./src/assets/azuraappIcon.png",
+    "icon": "./src/assets/icon_round.png",
     "scheme": "azuraapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/azuraappIcon.png",
+        "foregroundImage": "./src/assets/icon_round.png",
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
@@ -26,7 +26,7 @@
     "web": {
       "bundler": "metro",
       "output": "server",
-      "favicon": "./src/assets/azuraappIcon.png"
+      "favicon": "./src/assets/icon_round.png"
     },
     "plugins": [
       "expo-router",
