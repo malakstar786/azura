@@ -4,15 +4,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@store/auth-store';
 import { useCartStore } from '@store/cart-store';
 import { theme } from '@theme';
+import { API_ENDPOINTS, generateRandomOCSESSID, makeApiCall, setOCSESSID } from '@utils/api-config';
 import { getFlexDirection, getTextAlign } from '@utils/rtlStyles';
+import type { TranslationKeys } from '@utils/translations';
 import { Link, Stack, router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  FlatList,
   I18nManager,
+  Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -25,7 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Auth() {
     const { t } = useTranslation();
-    const { login, signup, isAuthenticated } = useAuthStore();
+    const { login, isAuthenticated } = useAuthStore();
     const { addToCart, getCart } = useCartStore();
     const [isLogin, setIsLogin] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
@@ -84,6 +89,36 @@ export default function Auth() {
       telephone: '',
       password: '',
     });
+
+    // Currency selection (signup-only, defer save until after account creation)
+    interface Currency {
+      title: string;
+      code: string;
+      symbol_left?: string;
+      symbol_right?: string;
+      image?: string;
+    }
+    const [currencies, setCurrencies] = useState<Currency[]>([]);
+    const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
+    const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+    const [isCurrencyLoading, setIsCurrencyLoading] = useState(false);
+
+    useEffect(() => {
+      const loadCurrencies = async () => {
+        try {
+          setIsCurrencyLoading(true);
+          const response = await makeApiCall(API_ENDPOINTS.currencies, { method: 'GET' });
+          if (response?.success === 1 && response.data?.currencies) {
+            setCurrencies(response.data.currencies);
+            // Do not auto-select any currency; require explicit user choice
+          }
+        } catch {}
+        finally {
+          setIsCurrencyLoading(false);
+        }
+      };
+      loadCurrencies();
+    }, []);
 
     const handleLoginInputChange = (field: keyof typeof loginForm, value: string) => {
       setLoginForm(prev => ({ ...prev, [field]: value }));
@@ -155,7 +190,7 @@ export default function Auth() {
       
       setIsLoading(true);
       setSignupErrors({});
-      
+
       const userData = {
         firstname: signupForm.firstname.trim(),
         lastname: signupForm.lastname.trim(),
@@ -163,11 +198,37 @@ export default function Auth() {
         telephone: signupForm.telephone.trim(),
         password: signupForm.password,
       };
-      
+
       try {
-        await signup(userData);
-        
-        // Router will handle redirection in the useEffect hook
+        // 0) Fresh OCSESSID for registration, same as account flow
+        const freshOCSESSID = await generateRandomOCSESSID();
+        await setOCSESSID(freshOCSESSID);
+
+        // 1) Create account
+        const registerResponse = await makeApiCall(API_ENDPOINTS.register, {
+          method: 'POST',
+          data: userData,
+        });
+
+        if (registerResponse?.success !== 1) {
+          throw new Error(Array.isArray(registerResponse?.error) ? registerResponse.error[0] : (registerResponse?.error || t('auth.registrationError')));
+        }
+
+        // 2) Save currency AFTER account creation (if user picked one)
+        if (selectedCurrency?.code) {
+          const body = new URLSearchParams();
+          body.append('code', selectedCurrency.code);
+          await makeApiCall(API_ENDPOINTS.changeCurrency, {
+            method: 'POST',
+            data: body.toString(),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          });
+        }
+
+        // 3) Log the user in
+        await login(userData.email, userData.password);
+
+        // Redirect handled by effect on isAuthenticated
       } catch (error: any) {
         console.error('AUTH.TSX: Signup error occurred:', error);
         
@@ -371,6 +432,18 @@ export default function Auth() {
           {signupErrors.password ? <Text style={styles.errorText}>{signupErrors.password}</Text> : null}
         </View>
         
+        {/* Currency selector (deferred apply) */}
+        <View style={styles.inputContainer}>
+          <TouchableOpacity
+            style={styles.dropdownButton}
+            onPress={() => setIsCurrencyOpen(true)}
+            disabled={isLoading || isCurrencyLoading}
+          >
+            <Text style={styles.dropdownText}>{selectedCurrency?.title || t('account.selectCountry' as TranslationKeys)}</Text>
+            <Ionicons name="chevron-down" size={16} color={theme.colors.black} />
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity
           style={styles.submitButton}
           onPress={handleSignup}
@@ -414,6 +487,51 @@ export default function Auth() {
             {isLogin ? renderLoginForm() : renderSignupForm()}
           </ScrollView>
         </KeyboardAvoidingView>
+
+        {/* Currency modal (outside scroll to overlay correctly) */}
+        <Modal
+          visible={isCurrencyOpen}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setIsCurrencyOpen(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setIsCurrencyOpen(false)}
+          >
+            <View style={styles.dropdownModal}>
+              {isCurrencyLoading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="small" color={theme.colors.black} />
+                </View>
+              ) : (
+                <FlatList
+                  data={currencies}
+                  keyExtractor={(item) => item.code}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.currencyItem}
+                      onPress={() => {
+                        setSelectedCurrency(item);
+                        setIsCurrencyOpen(false);
+                      }}
+                    >
+                      {item.image ? (
+                        <Image source={{ uri: item.image }} style={styles.flagImage} />
+                      ) : null}
+                      <Text style={styles.currencyTitle}>{item.title}</Text>
+                      {selectedCurrency?.code === item.code && (
+                        <Ionicons name="checkmark" size={20} color={theme.colors.black} />
+                      )}
+                    </TouchableOpacity>
+                  )}
+                  style={styles.currencyList}
+                />
+              )}
+            </View>
+          </TouchableOpacity>
+        </Modal>
       </SafeAreaView>
     );
 }
@@ -474,6 +592,24 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.white,
         textAlign: getTextAlign(),
     },
+    dropdownButton: {
+        flexDirection: getFlexDirection('row'),
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: theme.spacing.md,
+        paddingHorizontal: theme.spacing.md,
+        borderWidth: 1,
+        borderColor: theme.colors.black,
+        backgroundColor: theme.colors.white,
+    },
+    dropdownText: {
+        fontSize: theme.typography.sizes.md,
+        color: theme.colors.black,
+        textAlign: getTextAlign(),
+    },
+    loadingContainer: {
+        padding: theme.spacing.sm,
+    },
     passwordContainer: {
         flexDirection: getFlexDirection('row'),
         alignItems: 'center',
@@ -524,5 +660,45 @@ const styles = StyleSheet.create({
         fontSize: theme.typography.sizes.md,
         color: theme.colors.black,
         fontWeight: theme.typography.weights.medium as any,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: theme.colors.overlay,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    dropdownModal: {
+        backgroundColor: theme.colors.white,
+        borderRadius: theme.borderRadius.md,
+        maxHeight: 300,
+        width: 200,
+        shadowColor: theme.shadows.md.shadowColor,
+        shadowOffset: theme.shadows.md.shadowOffset,
+        shadowOpacity: theme.shadows.md.shadowOpacity,
+        shadowRadius: theme.shadows.md.shadowRadius,
+        elevation: theme.shadows.md.elevation,
+    },
+    currencyList: {
+        maxHeight: 280,
+    },
+    currencyItem: {
+        flexDirection: getFlexDirection('row'),
+        alignItems: 'center',
+        paddingVertical: theme.spacing.md,
+        paddingHorizontal: theme.spacing.md,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.lightGray,
+        gap: theme.spacing.sm,
+    },
+    flagImage: {
+        width: 16,
+        height: 12,
+        resizeMode: 'contain',
+    },
+    currencyTitle: {
+        flex: 1,
+        fontSize: theme.typography.sizes.md,
+        color: theme.colors.black,
+        textAlign: getTextAlign(),
     },
 });
