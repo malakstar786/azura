@@ -2,7 +2,7 @@
   "expo": {
     "name": "Azura App",
     "slug": "azura-app",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./src/assets/new_icon.png",
     "scheme": "azuraapp",
